@@ -30,6 +30,7 @@ gem 'devise'
 gem 'bootstrap-sass'
 gem 'omniauth'
 gem 'omniauth-google-oauth2'
+gem 'config'
 
 # Use Unicorn as the app server
 # gem 'unicorn'
