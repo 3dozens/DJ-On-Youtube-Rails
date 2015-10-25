@@ -1,8 +1,4 @@
 GEM
-  remote: https://api.rubygems.org/
-  specs:
-
-GEM
   remote: https://rubygems.org/
   specs:
     actionmailer (4.2.3)
@@ -295,3 +291,6 @@ DEPENDENCIES
   uglifier (>= 1.3.0)
   view_source_map
   web-console (~> 2.0)
+
+BUNDLED WITH
+   1.10.6
