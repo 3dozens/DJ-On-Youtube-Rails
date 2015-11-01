@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20151031115957) do
+ActiveRecord::Schema.define(version: 20151101125212) do
 
   create_table "playlists", force: :cascade do |t|
     t.integer  "user_id",      limit: 4
@@ -22,6 +22,18 @@ ActiveRecord::Schema.define(version: 20151031115957) do
   end
 
   add_index "playlists", ["user_id"], name: "index_playlists_on_user_id", using: :btree
+
+  create_table "tracks", force: :cascade do |t|
+    t.integer  "playlist_id", limit: 4
+    t.integer  "video_id",    limit: 4,   null: false
+    t.string   "title",       limit: 255, null: false
+    t.time     "length",                  null: false
+    t.integer  "bpm",         limit: 4,   null: false
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
+  end
+
+  add_index "tracks", ["playlist_id"], name: "index_tracks_on_playlist_id", using: :btree
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  limit: 255, default: "", null: false
@@ -46,4 +58,5 @@ ActiveRecord::Schema.define(version: 20151031115957) do
   add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
 
   add_foreign_key "playlists", "users"
+  add_foreign_key "tracks", "playlists"
 end
