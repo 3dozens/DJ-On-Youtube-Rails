@@ -38,5 +38,7 @@ module DJonYoutube
       g.test_framework :rspec # テスティングフレームワークの設定
       g.view_specs false # viewのテストを自動生成しない
     end
+
+    config.web_console.whitelisted_ips = '192.168.33.1'
   end
 end
