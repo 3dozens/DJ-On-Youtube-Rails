@@ -1,8 +1,9 @@
 $ ->
 
   # 音声ファイルの場所
-  SOUND_URL1 = 'http://192.168.33.10:3000/music-request?video_url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Df0kXY7MQHLw%26'
-  SOUND_URL2 = 'http://192.168.33.10:3000/music-request?video_url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D0H24mH17oJw'
+  SOUND_URLS = ['http://192.168.33.10:3000/music-request?video_url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Df0kXY7MQHLw%26',
+               'http://192.168.33.10:3000/music-request?video_url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D0H24mH17oJw'
+  ]
 
   # Web Audio APIが使えるか確認しつつ、contextをつくる
   try
@@ -12,9 +13,12 @@ $ ->
 
   context = new SupportedAudioContext()
 
-  # bufferの初期化
-  source1 = context.createBufferSource()
-  source2 = context.createBufferSource()
+  # 現在のノード
+  currentNode1 = null;
+  currentNode2 = null;
+
+  # 選んだ動画のすべてのbufferSource
+  bufferSources = [];
 
   # 音声ファイルのロード
   # click時に再生
@@ -27,23 +31,37 @@ $ ->
       source2.start(0)
 
   $('.stop1').on 'click', ->
-      source1.stop()
+    source1.stop()
 
   $('.stop2').on 'click', ->
-      source2.stop()
+    source2.stop()
+
+  $('.load').on 'click', ->
+    loadSounds(SOUND_URLS, bufferSources, context).done ->
+      console.log(bufferSources)
+
 
 # 音声を非同期でロードします
-load = (url, source, context) ->
+loadSounds = (urlList, bufferSources, context) ->
   dfd = new $.Deferred
 
-  request = new XMLHttpRequest()
-  request.open('GET', url, true)
-  request.responseType = 'arraybuffer' # ArrayBufferとしてロード
-  request.send()
-  request.onload = ->
-    # contextにArrayBufferを渡し、decodeさせる
-    context.decodeAudioData request.response, (response_buf) ->
-      source.buffer = response_buf
-      source.connect(context.destination)
-      dfd.resolve()
+  $.each urlList, (i, url) ->
+    videoId = decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]) # URLからvideo idを抜き出します
+
+    request = new XMLHttpRequest()
+    request.open('GET', url, true)
+    request.responseType = 'arraybuffer' # ArrayBufferとしてロード
+    request.send()
+    request.onload = ->
+      # contextにArrayBufferを渡し、decodeさせる
+      context.decodeAudioData request.response, (decoded_buf) ->
+        source = context.createBufferSource();
+        source.buffer = decoded_buf
+        source.connect(context.destination)
+
+        bufferObj = {videoId : videoId, source : source}
+        bufferSources.push bufferObj
+
+        if url == $(urlList).last()[0]
+          dfd.resolve()
   dfd.promise()
