@@ -2,6 +2,7 @@ Rails.application.routes.draw do
   devise_for :users
 
   get 'play' => 'users#play'
+  get 'music-request' => 'tracks#music_request'
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 
