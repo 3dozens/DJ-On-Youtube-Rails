@@ -13,6 +13,7 @@
 //= require jquery
 //= require jquery_ujs
 //= require turbolinks
+//= require_directory ./vendor
 //= require_directory ./lib
 //= require_directory ./main
 
