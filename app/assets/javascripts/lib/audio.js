@@ -37,7 +37,7 @@ function loadSounds(urlList, soundList, context) {
                 var bufferObj = {videoId: videoId, source: source};
                 soundList.push(bufferObj);
 
-                if (url == $(urlList).last()[0]) dfd.resolve();
+                if (url === $(urlList).last()[0]) dfd.resolve();
             });
         };
     });
