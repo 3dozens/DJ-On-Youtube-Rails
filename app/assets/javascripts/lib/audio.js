@@ -45,6 +45,24 @@ function loadSounds(urlList, soundList, context) {
     return dfd.promise();
 }
 
+function loadSoundsOnAudioElement(urlList, context) {
+    var dfd = new $.Deferred;
+
+    $.each(urlList, function(i, url) {
+        var audio = new Audio();
+        audio.src = url;
+
+        audio.addEventListener('loadstart', function() {
+            var source = context.createMediaElementSource(audio);
+            source.connect(context.destination);
+        }, false);
+
+        if (url === $(urlList).last()[0]) dfd.resolve();
+    });
+
+    return dfd.promise();
+}
+
 function play(playSource, soundList, context) {
     playSource.start();
 

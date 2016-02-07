@@ -29,6 +29,6 @@ $ ->
     source2.stop()
 
   $('.load').on 'click', ->
-    loadSounds(SOUND_URLS, soundList, context).done ->
+    loadSoundsOnAudioElement(SOUND_URLS, context).done ->
       console.log(soundList)
 
