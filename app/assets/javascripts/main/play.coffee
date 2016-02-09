@@ -4,10 +4,8 @@ $ ->
 #  videoId	f0kXY7MQHLw&
   SOUND_URLS = ['http://192.168.33.10:3000/music-request?video_url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Df0kXY7MQHLw%26',
                'http://192.168.33.10:3000/music-request?video_url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D0H24mH17oJw'
-  ]
-#  SOUND_URLS = ['f0kXY7MQHLw%26',
-#                 '0H24mH17oJw'
-#    ]
+  ];
+  VIDEO_IDS = ['f0kXY7MQHLw%26', '0H24mH17oJw'];
 
   context = createContext();
 
@@ -34,6 +32,6 @@ $ ->
     source2.stop()
 
   $('.load').on 'click', ->
-    loadSoundsOnPreloadJS(SOUND_URLS).done ->
+    loadSoundsOnSoundJS(SOUND_URLS).done ->
       console.log("done")
 

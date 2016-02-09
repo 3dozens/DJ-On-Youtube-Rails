@@ -71,25 +71,58 @@ function loadSoundsOnPreloadJS(urlList) {
     return dfd.promise();
 }
 
-function loadSoundsOnSoundJS(videoIdList) {
+function loadSoundsOnSoundJS(urlList) {
     var dfd = new $.Deferred;
 
-    createjs.Sound.on("complete", function() {
-        dfd.resolve();
+    var baseURL = "http://192.168.33.10:3000/music-request?"; // ajaxリクエストのベースURL
+
+    // ajaxリクエストのためのURLを生成する
+    var requestURL = baseURL;
+    $.each(urlList, function(i, url) {
+        requestURL += "video_urls[]=" + url;
+        if (url !== $(urlList).last()[0]) requestURL += "&"; // 最後のクエリじゃなかったら&を追記
     });
 
-    createjs.Sound.alternateExtensions = ["mp3"];
+    // YoutubeのURLからビデオIDを取り出し配列に詰める
+    var videoIds = [];
+    $.each(urlList, function(i, url) {
+        var videoId = decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]); // ビデオIDを取り出す
+        videoIds.push(videoId);
+    });
+
+    $.ajax({
+        url: requestURL,
+        success: registerSounds(videoIds, dfd)
+    });
+
+    return dfd.promise();
+}
+
+/**
+ * videoIdから音源をSoundJSに登録する
+ * 全音源を登録し終わると渡された$.Deferredをresolveします
+ * @param videoIds サーバー上でダウンロード済みの音源のYoutube Video ID
+ * @param dfd $.Deferredオブジェクト
+ * @returns {*} $.Deferred.promise()
+ */
+function registerSounds(videoIds, dfd) {
+
+    var basePath = "./downloaded_files/"; // サーバー上の音源フォルダまでのパス
 
     // manifestを作成する
     // idはYoutubeのVideoIdとする
     var manifest = [];
-    $.each(videoIdList, function(i, videoId) {
-        //var videoId = decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]); // URLからvideo idを抜き出す
-        var manifestElem = {"src":videoId + ".mp3", "id": videoId};
+    $.each(videoIds, function(i, videoId) {
+        var manifestElem = {"src": videoId + ".mp3", "id": videoId};
         manifest.push(manifestElem);
     });
 
-    createjs.Sound.registerSounds(manifest, baseUrl);
+    createjs.Sound.registerSounds(manifest, basePath);
+
+    // SoundJSに音源を登録し終わったらresolve
+    createjs.Sound.on("complete", function() {
+        dfd.resolve();
+    });
 
     return dfd.promise();
 }
@@ -114,4 +147,13 @@ function play(playSource, soundList, context) {
 
 function playOnSoundJS(videoId) {
     createjs.Sound.play(videoId);
+}
+
+/**
+ * Youtubeの動画URLからビデオIDを取り出します
+ * @param url Youtubeの動画URL
+ * @returns {string} ビデオID
+ */
+function getVideoId(url) {
+    return decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]);
 }
