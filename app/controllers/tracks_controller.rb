@@ -7,7 +7,7 @@ class TracksController < ApplicationController
     filename = fetch_filename
     filepath = Rails.root.join("public").join("downloaded_files") + filename
 
-    send_data(File.read(filepath), filename: filename)
+    send_data(File.read(filepath), filename: filename, type: "audio/mp3")
 
     File.delete filepath
 

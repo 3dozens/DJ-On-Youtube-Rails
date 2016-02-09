@@ -21,7 +21,7 @@ function loadSounds(urlList, soundList, context) {
     var dfd = new $.Deferred;
 
     $.each(urlList, function(i, url) {
-        var videoId = decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]); // URLからvideo idを抜き出します
+        var videoId = decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]); // URLからvideo idを抜き出す
         var request = new XMLHttpRequest();
 
         request.open('GET', url, true);
@@ -45,6 +45,55 @@ function loadSounds(urlList, soundList, context) {
     return dfd.promise();
 }
 
+function loadSoundsOnPreloadJS(urlList) {
+    var dfd = new $.Deferred;
+
+    // この関数のローカル変数としてqueueをnewしているが、
+    // 他の関数でも使うかもしれない。修正する必要が出る可能性あり
+    var queue = new createjs.LoadQueue();
+    queue.installPlugin(createjs.Sound);
+    createjs.Sound.alternateExtensions = ["mp3"];
+    queue.addEventListener("complete", function() {
+        dfd.resolve();
+    });
+
+    // manifestを作成する
+    // idはYoutubeのVideoIdとする
+    var manifest = [];
+    $.each(urlList, function(i, url) {
+        var videoId = decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]); // URLからvideo idを抜き出す
+        var manifestElem = {"src":url, "id": videoId};
+        manifest.push(manifestElem);
+    });
+
+    queue.loadManifest(manifest);
+
+    return dfd.promise();
+}
+
+function loadSoundsOnSoundJS(videoIdList) {
+    var dfd = new $.Deferred;
+
+    createjs.Sound.on("complete", function() {
+        dfd.resolve();
+    });
+
+    createjs.Sound.alternateExtensions = ["mp3"];
+
+    // manifestを作成する
+    // idはYoutubeのVideoIdとする
+    var manifest = [];
+    $.each(videoIdList, function(i, videoId) {
+        //var videoId = decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]); // URLからvideo idを抜き出す
+        var manifestElem = {"src":videoId + ".mp3", "id": videoId};
+        manifest.push(manifestElem);
+    });
+
+    createjs.Sound.registerSounds(manifest, baseUrl);
+
+    return dfd.promise();
+}
+
 function play(playSource, soundList, context) {
     playSource.start();
 
@@ -61,4 +110,8 @@ function play(playSource, soundList, context) {
     });
 
     //return newSource;
+}
+
+function playOnSoundJS(videoId) {
+    createjs.Sound.play(videoId);
 }
