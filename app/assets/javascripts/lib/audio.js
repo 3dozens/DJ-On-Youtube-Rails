@@ -80,7 +80,7 @@ function loadSoundsOnSoundJS(urlList) {
     var requestURL = baseURL;
     $.each(urlList, function(i, url) {
         requestURL += "video_urls[]=" + url;
-        if (url !== $(urlList).last()[0]) requestURL += "&"; // 最後のクエリじゃなかったら&を追記
+        if (url !== $(urlList).last()[0]) requestURL += "&"; // 最後のパラメータじゃなかったら&を追記
     });
 
     // YoutubeのURLからビデオIDを取り出し配列に詰める
@@ -92,7 +92,7 @@ function loadSoundsOnSoundJS(urlList) {
 
     $.ajax({
         url: requestURL,
-        success: registerSounds(videoIds, dfd)
+        success: registerSounds.bind(this, videoIds, dfd)
     });
 
     return dfd.promise();
@@ -107,8 +107,6 @@ function loadSoundsOnSoundJS(urlList) {
  */
 function registerSounds(videoIds, dfd) {
 
-    var basePath = "./downloaded_files/"; // サーバー上の音源フォルダまでのパス
-
     // manifestを作成する
     // idはYoutubeのVideoIdとする
     var manifest = [];
@@ -117,11 +115,22 @@ function registerSounds(videoIds, dfd) {
         manifest.push(manifestElem);
     });
 
+    var basePath = "/downloaded_files/"; // サーバー上の音源フォルダまでのパス
+
     createjs.Sound.registerSounds(manifest, basePath);
 
-    // SoundJSに音源を登録し終わったらresolve
+    // SoundJSに音源を登録し終わったらサーバー上の音源を削除してresolve
     createjs.Sound.on("complete", function() {
-        dfd.resolve();
+        var requestURL = "http://192.168.33.10:3000/delete-music?";
+        $.each(videoIds, function(i, videoId) {
+            requestURL += "video_ids[]=" + videoId;
+            if (videoId !== $(videoIds).last()[0]) requestURL += "&"; // 最後のパラメータじゃなかったら&を追記
+        });
+
+        $.ajax({
+            url: requestURL,
+            success: function() { dfd.resolve(); }
+        });
     });
 
     return dfd.promise();
