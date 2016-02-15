@@ -19,6 +19,8 @@ class TracksController < ApplicationController
       filename = video_id + ".mp3"
       File.delete(basePath + filename)
     end
+
+    head :ok
   end
 
   private
