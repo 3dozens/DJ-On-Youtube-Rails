@@ -7,7 +7,7 @@ $ ->
   ];
   VIDEO_IDS = ['f0kXY7MQHLw%26', '0H24mH17oJw'];
 
-  context = createContext();
+#  context = createContext();
 
   # 現在のノード
   currentNode1 = null;
@@ -20,18 +20,18 @@ $ ->
   # click時に再生
   $('.start1').on 'click', ->
 #    play(soundList[0].source, soundList, context)
-    playOnSoundJS("f0kXY7MQHLw");
+    play("f0kXY7MQHLw");
 
   $('.start2').on 'click', ->
     source2.start(0)
 
   $('.stop1').on 'click', ->
-    soundList[0].source.stop();
+    createjs.SoundJS.stop();
 
   $('.stop2').on 'click', ->
     source2.stop()
 
   $('.load').on 'click', ->
-    loadSoundsOnSoundJS(YOUTUBE_URLS).done ->
+    loadSounds(YOUTUBE_URLS).done ->
       console.log("done")
 
