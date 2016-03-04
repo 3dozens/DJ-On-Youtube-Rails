@@ -2,15 +2,13 @@ class TracksController < ApplicationController
 
   def music_request
 
-    # TODO: download_videoは並列に処理できない！
     params[:video_urls].each do |video_url|
       download_video(video_url)
     end
 
     Process.waitall
 
-    head :ok # TODO: レスポンス返すのをダウンロードが終わってからにする
-    # TODO: 音源の削除をどうするか考える
+    head :ok
   end
 
   def delete_music
@@ -33,7 +31,6 @@ class TracksController < ApplicationController
     end
   end
 
-  # TODO: 必要なければ削除
   def fetch_filename
     filename = `youtube-dl --get-filename -x -o "%(id)s.%(ext)s" #{params[:video_url]}`.chomp
     Pathname(filename).sub_ext(".mp3").to_s # fetchした段階では拡張子がmp3になっていない場合があるので書き換える
