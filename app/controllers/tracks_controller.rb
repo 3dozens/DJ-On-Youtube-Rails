@@ -2,25 +2,38 @@ class TracksController < ApplicationController
 
   def music_request
 
-    download_video
+    params[:video_urls].each do |video_url|
+      download_video(video_url)
+    end
 
-    filename = fetch_filename
-    filepath = Rails.root.join("public").join("downloaded_files") + filename
+    Process.waitall
 
-    send_data(File.read(filepath), filename: filename)
+    head :ok
+  end
 
-    File.delete filepath
+  def delete_music
+    basePath = Rails.root.join("public").join("downloaded_files")
+    params[:video_ids].each do |video_id|
+      filename = video_id + ".mp3"
+      File.delete(basePath + filename)
+    end
 
+    head :ok
   end
 
   private
 
-  def download_video
-    `youtube-dl -x --audio-format "mp3" -o "./public/downloaded_files/%(id)s.%(ext)s" #{params[:video_url]}`
+  def download_video(video_url)
+    cmd = %Q{youtube-dl -x --audio-format "mp3" -o "./public/downloaded_files/%(id)s.%(ext)s" #{video_url}}
+    Process.fork do
+      Process.exec cmd
+      Process.wait
+    end
   end
 
   def fetch_filename
     filename = `youtube-dl --get-filename -x -o "%(id)s.%(ext)s" #{params[:video_url]}`.chomp
     Pathname(filename).sub_ext(".mp3").to_s # fetchした段階では拡張子がmp3になっていない場合があるので書き換える
   end
+
 end

@@ -1,11 +1,13 @@
 $ ->
 
   # 音声ファイルの場所
-  SOUND_URLS = ['http://192.168.33.10:3000/music-request?video_url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Df0kXY7MQHLw%26',
-               'http://192.168.33.10:3000/music-request?video_url=https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D0H24mH17oJw'
-  ]
+#  videoId	f0kXY7MQHLw&
+  YOUTUBE_URLS = ['https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3Df0kXY7MQHLw',
+               'https%3A%2F%2Fwww.youtube.com%2Fwatch%3Fv%3D0H24mH17oJw'
+  ];
+  VIDEO_IDS = ['f0kXY7MQHLw%26', '0H24mH17oJw'];
 
-  context = createContext();
+#  context = createContext();
 
   # 現在のノード
   currentNode1 = null;
@@ -17,18 +19,19 @@ $ ->
   # 音声ファイルのロード
   # click時に再生
   $('.start1').on 'click', ->
-    play(soundList[0].source, soundList, context)
+#    play(soundList[0].source, soundList, context)
+    play("f0kXY7MQHLw");
 
   $('.start2').on 'click', ->
     source2.start(0)
 
   $('.stop1').on 'click', ->
-    soundList[0].source.stop();
+    createjs.SoundJS.stop();
 
   $('.stop2').on 'click', ->
     source2.stop()
 
   $('.load').on 'click', ->
-    loadSounds(SOUND_URLS, soundList, context).done ->
-      console.log(soundList)
+    loadSounds(YOUTUBE_URLS).done ->
+      console.log("done")
 
