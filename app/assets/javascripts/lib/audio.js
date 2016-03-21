@@ -35,9 +35,8 @@ function loadSounds(urlList) {
     });
 
     $.ajax({
-        url: requestURL,
-        success: registerSounds.bind(this, videoIds, dfd)
-    });
+        url: requestURL
+    }).then(registerSounds.bind(this, videoIds, dfd));
 
     return dfd.promise();
 }
