@@ -7,17 +7,6 @@ $ ->
   ];
   VIDEO_IDS = ['f0kXY7MQHLw%26', '0H24mH17oJw'];
 
-#  context = createContext();
-
-  # 現在のノード
-  currentNode1 = null;
-  currentNode2 = null;
-
-  # 選んだ動画のすべてのbufferSource
-  soundList = [];
-
-  # 音声ファイルのロード
-  # click時に再生
   $('.start1').on 'click', ->
 #    play(soundList[0].source, soundList, context)
     play("f0kXY7MQHLw");

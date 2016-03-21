@@ -1,5 +1,7 @@
-
-// Web Audio APIが使えるか確認しつつ、contextをつくる
+/**
+ * Web Audio APIが使えるか確認しつつ、contextをつくる
+ * @returns AudioContext
+ */
 function createContext() {
     try {
         var SupportedAudioContext = window.AudioContext || window.webkitAudioContext;
@@ -23,7 +25,7 @@ function loadSounds(urlList) {
     // ajaxリクエストのためのURLを組み立てる
     var requestURL = baseURL;
     $.each(urlList, function(i, url) {
-        requestURL += "video_urls[]=" + url; // TODO: パラメータをvideo_ids[]に統一する
+        requestURL += "video_urls[]=" + url;
         if (url !== $(urlList).last()[0]) requestURL += "&"; // 最後のパラメータじゃなかったら&を追記
     });
 
