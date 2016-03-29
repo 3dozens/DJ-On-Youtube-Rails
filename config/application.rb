@@ -39,6 +39,7 @@ module DJonYoutube
       g.view_specs false # viewのテストを自動生成しない
     end
 
-    config.web_console.whitelisted_ips = '192.168.33.1'
+    config.web_console.whitelisted_ips = '192.168.33.10'
+    config.serve_static_files = true
   end
 end

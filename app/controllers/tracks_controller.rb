@@ -1,24 +1,19 @@
 class TracksController < ApplicationController
 
   def music_request
+    Youtube.download_videos(params[:video_urls])
 
-    download_video
-
-    filename = get_filename
-    filepath = Rails.root.join("public").join("downloaded_files") + filename
-
-    send_data(File.read(filepath), filename: filename)
-
-    File.delete filepath
+    head :ok
   end
 
-  private
+  def delete_music
+    basePath = Rails.root.join("public").join("downloaded_files")
+    params[:video_ids].each do |video_id|
+      filename = video_id + ".mp3"
+      File.delete(basePath + filename)
+    end
 
-  def download_video
-    `youtube-dl -x -o "./public/downloaded_files/%(id)s.%(ext)s" #{params[:video_url]}`
+    head :ok
   end
 
-  def get_filename
-    `youtube-dl --get-filename -x -o "%(id)s.%(ext)s" #{params[:video_url]}`.chomp
-  end
 end
