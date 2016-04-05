@@ -1,7 +1,7 @@
 class TracksController < ApplicationController
 
   def music_request
-    Youtube.download_videos(params[:video_urls])
+    Youtube.download_videos(params[:video_ids])
 
     head :ok
   end

@@ -1,5 +1,49 @@
-<button class="start1" type="button">start1</button>
-<button class="stop1" type="button">stop1</button>
-<button class="start2" type="button">start2</button>
-<button class="stop2" type="button">stop2</button>
-<button class="load" type="button">load!</button>
+<h1>DJ on Youtube</h1>
+<hr>
+<div class="turntables-container">
+  <div class="row">
+    <div class="col-md-6">
+      <h2>Turntable 1</h2>
+      <div id="player1">
+        <button id="play1" type="button">play/stop</button>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <h2>Turntable 2</h2>
+      <div id="player2">
+        <button id="play2" type="button">play/stop</button>
+      </div>
+    </div>
+  </div>
+</div>
+<span class="glyphicon glyphicon-volume-up" aria-hidden="true"></span>
+<div class="vertical-sliders-container">
+  <p class="vertical-slider" id="vertical-slider1"></p>
+  <p class="vertical-slider" id="vertical-slider2"></p>
+</div>
+<div id="holizontal-slider"></div>
+<hr>
+<form class="form-inline" id="search" onsubmit="return false;">
+  <div class="form-group">
+    <input type="text" class="form-control" id="q">
+    <input class="btn btn-primary" type="submit" value="Search!">
+  </div>
+</form>
+<hr>
+<button class="btn btn-default" id="prev"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span>&nbsp; Prev</button>
+<button class="btn btn-default" id="play">Play &nbsp;<span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+<button class="btn btn-default" id="pause">Pause &nbsp;<span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button>
+<button class="btn btn-default" id="next">Next &nbsp;<span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
+<hr>
+<p>Tracklist <span class="glyphicon glyphicon-list" aria-hidden="true"></span></p>
+<div class="row list-container">
+  <ul id="playlist">
+  </ul>
+</div>
+<hr>
+<p>Search Result <span class="glyphicon glyphicon-search" aria-hidden="true"></span></p>
+<div class="list-container">
+  <ul id="list">
+  </ul>
+</div>

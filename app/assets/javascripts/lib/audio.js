@@ -13,34 +13,26 @@ function createContext() {
 }
 
 /**
- * Youtubeのurlの配列を受け取ってSoundJSに登録します
- * @param urlList
+ * YoutubeのビデオIDの配列を受け取ってSoundJSに登録します
+ * @param videoIds
+ * @param $dfd
  * @returns {*}
  */
-function loadSounds(urlList) {
-    var dfd = new $.Deferred;
-
+function loadSounds(videoIds, $dfd) {
     var baseURL = "http://192.168.33.10:3000/music-request?"; // ajaxリクエストのベースURL
 
     // ajaxリクエストのためのURLを組み立てる
     var requestURL = baseURL;
-    $.each(urlList, function(i, url) {
-        requestURL += "video_urls[]=" + url;
-        if (url !== $(urlList).last()[0]) requestURL += "&"; // 最後のパラメータじゃなかったら&を追記
-    });
-
-    // YoutubeのURLからビデオIDを取り出し配列に詰める
-    var videoIds = [];
-    $.each(urlList, function(i, url) {
-        var videoId = decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]); // ビデオIDを取り出す
-        videoIds.push(videoId);
+    $.each(videoIds, function(i, id) {
+        requestURL += "video_ids[]=" + id;
+        if (id !== $(videoIds).last()[0]) requestURL += "&"; // 最後のパラメータじゃなかったら&を追記
     });
 
     $.ajax({
         url: requestURL
-    }).then(registerSounds.bind(this, videoIds, dfd));
+    }).then(registerSounds.bind(this, videoIds, $dfd));
 
-    return dfd.promise();
+    return $dfd.promise();
 }
 
 /**
@@ -75,10 +67,6 @@ function registerSounds(videoIds, dfd) {
     return dfd.promise();
 }
 
-function play(videoId) {
-    createjs.Sound.play(videoId);
-}
-
 /**
  * サーバー上に残ったファイルを削除する
  * @param videoIds 削除するビデオIDの配列
@@ -97,6 +85,15 @@ function deleteSounds(videoIds, dfd) {
         url: requestURL,
         success: function() { dfd.resolve(); }
     });
+}
+
+/**
+ * soundInstanceからsoundIdを取得します
+ * @param soundInstance
+ * @returns soundId
+ */
+function getSoundId(soundInstance) {
+    return soundInstance.src.match(/\/downloaded_files\/(.*)\.mp3/)[1];
 }
 
 /**
