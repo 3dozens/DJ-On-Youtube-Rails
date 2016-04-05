@@ -1,0 +1,88 @@
+body {
+    text-align: center;
+}
+
+div.turntables-container {
+    width: 1350px;
+    height: 500px;
+}
+
+div.vertical-sliders-container {
+    width: 500px;
+    height: 460px;
+    margin: 0 auto;
+}
+
+p.vertical-slider {
+    height: 400px !important;
+    padding: 0;
+    display: inline-block;
+}
+
+p#vertical-slider1 {
+    float: left;
+}
+
+p#vertical-slider2 {
+    float: right;
+}
+
+div.list-container {
+    width: 1250px;
+    margin: 0 auto;
+}
+
+ul {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+li.movie {
+    float: left;
+    padding: 10px;
+    margin: 5px;
+    width: 190px;
+    height: 190px;
+}
+
+li.movie.on {
+    border-radius: 10px;
+    background-color: #afa;
+}
+
+li.movie.playing {
+    background-color: deeppink;
+}
+
+p.title {
+    height: 40px;
+    margin: 0;
+}
+
+.assign1-button {
+    margin-right: 18px
+}
+
+.assign2-button {
+    margin-left: 18px
+}
+
+#holizontal-slider {
+    margin-top: 60px;
+    margin: 0 auto;
+    width: 600px;
+    background: #ddd;
+}
+
+#player1Area {
+    padding-right: 0;
+}
+
+#player2Area {
+    padding-left: 0;
+}
+
+.glyphicon-volume-up {
+    font-size: 25px;
+}
