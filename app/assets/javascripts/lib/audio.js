@@ -15,11 +15,10 @@ function createContext() {
 /**
  * YoutubeのビデオIDの配列を受け取ってSoundJSに登録します
  * @param videoIds
+ * @param $dfd
  * @returns {*}
  */
-function loadSounds(videoIds) {
-    var dfd = new $.Deferred;
-
+function loadSounds(videoIds, $dfd) {
     var baseURL = "http://192.168.33.10:3000/music-request?"; // ajaxリクエストのベースURL
 
     // ajaxリクエストのためのURLを組み立てる
@@ -31,9 +30,9 @@ function loadSounds(videoIds) {
 
     $.ajax({
         url: requestURL
-    }).then(registerSounds.bind(this, videoIds, dfd));
+    }).then(registerSounds.bind(this, videoIds, $dfd));
 
-    return dfd.promise();
+    return $dfd.promise();
 }
 
 /**
@@ -86,6 +85,15 @@ function deleteSounds(videoIds, dfd) {
         url: requestURL,
         success: function() { dfd.resolve(); }
     });
+}
+
+/**
+ * soundInstanceからsoundIdを取得します
+ * @param soundInstance
+ * @returns soundId
+ */
+function getSoundId(soundInstance) {
+    return soundInstance.src.match(/\/downloaded_files\/(.*)\.mp3/)[1];
 }
 
 /**

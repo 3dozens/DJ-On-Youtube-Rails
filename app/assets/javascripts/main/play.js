@@ -1,8 +1,9 @@
 $(function() {
-    var currentSoundId1;
-    var currentSoundId2;
     var currentSoundInstance1;
     var currentSoundInstance2;
+
+    var ppc = new createjs.PlayPropsConfig().set({volume: 0.5});
+    createjs.Sound.setDefaultPlayProps =
 
     $('#q').focus();
 
@@ -123,28 +124,34 @@ $(function() {
     });
 
     $(document).on('click', '#playlist .assign1-button', function(){
+        var $dfd = new $.Deferred;
         var videoId = $($(this).parent()).data('video-id');
-        loadSounds([videoId]);
-        currentSoundId1 = videoId;
+        loadSounds([videoId], $dfd).then(function() {
+            currentSoundInstance1 = createjs.Sound.createInstance(videoId);
+        });
     });
 
     $(document).on('click', '#playlist .assign2-button', function(){
+        var $dfd = new $.Deferred;
         var videoId = $($(this).parent()).data('video-id');
-        loadSounds([videoId]);
-        currentSoundId2 = videoId;
+        loadSounds([videoId], $dfd).then(function() {
+            currentSoundInstance2 = createjs.Sound.createInstance(videoId)
+        });
     });
 
     $(document).on('click', '#play1', function(){
-        if (currentSoundInstance1 === undefined) {
-            currentSoundInstance1 = createjs.Sound.play(currentSoundId1);
+        //そのインスタンスでの初回の再生の場合、play()する
+        if (currentSoundInstance1.playState === null) {
+            currentSoundInstance1.play();
         } else {
             currentSoundInstance1.paused = !currentSoundInstance1.paused;
         }
     });
 
     $(document).on('click', '#play2', function(){
-        if (currentSoundInstance2 === undefined) {
-            currentSoundInstance2 = createjs.Sound.play(currentSoundId2);
+        //そのインスタンスでの初回の再生の場合、play()する
+        if (currentSoundInstance2.playState === null) {
+            currentSoundInstance2.play();
         } else {
             currentSoundInstance2.paused = !currentSoundInstance2.paused;
         }
