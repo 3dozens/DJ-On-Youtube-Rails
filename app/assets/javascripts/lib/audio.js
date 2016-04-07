@@ -117,10 +117,10 @@ function drawWaveform(canvas, data, sampleRate) {
     var width  = canvas.width;
     var height = canvas.height;
 
-    var paddingTop    = 20;
-    var paddingBottom = 20;
-    var paddingLeft   = 30;
-    var paddingRight  = 30;
+    var paddingTop    = 10;
+    var paddingBottom = 10;
+    var paddingLeft   = 20;
+    var paddingRight  = 20;
 
     var innerWidth  = width  - paddingLeft - paddingRight;
     var innerHeight = height - paddingTop  - paddingBottom;
