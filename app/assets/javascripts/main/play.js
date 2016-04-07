@@ -2,8 +2,9 @@ $(function() {
     var currentSoundInstance1;
     var currentSoundInstance2;
 
-    var ppc = new createjs.PlayPropsConfig().set({volume: 0.5});
-    createjs.Sound.setDefaultPlayProps =
+    //var ppc = new createjs.PlayPropsConfig().set({volume: 0.5});
+    //createjs.Sound.setDefaultPlayProps = ppc;
+    //TODO: それぞれのターンテーブルのデフォルト音量を設定する
 
     $('#q').focus();
 
@@ -68,60 +69,9 @@ $(function() {
         }
     });
 
-    $('#search').submit(function(){
-        var url = "https://www.googleapis.com/youtube/v3/search";
-        var options = {
-            key: "AIzaSyDx3H3XYL6KiYgcKa5zIBf95OixQFpohkU",
-            part: "snippet",
-            q: $('#q').val(),
-            type: "video",
-            maxResults: 10
-        };
+    $('#search').submit(curlYoutubeThumbnail);
 
-        $.get(url, options, function(rs){
-            console.log(rs);
-            $('#list').empty();
-            for (var i = 0; i < rs.items.length; i++) {
-                var item = rs.items[i];
-                $('#list').append(
-                    $('<li class="movie">').append(
-                        $('<img>').attr({
-                            'src': item['snippet']['thumbnails']['default']['url'],
-                            'class': 'img-thumbnail'
-                        })
-                    ).attr('data-video-id', item['id']['videoId']).append(
-                        $('<li>').append(
-                            $('<p class="title">').append(function(){
-                                var txt = item['snippet']['title'];
-                                if(txt.length > 41){
-                                    txt = txt.substr(0, 41);
-                                    $(this).text(txt + "…");
-                                }
-                                else return txt;
-                            })
-                        )
-                    )
-                );
-            }
-        }, "json")
-    });
-
-    $(document).on('click', '#list .movie', function(){
-        var videoId = $(this).data('video-id');
-        $(this).toggleClass('on');
-
-        if ($(this).hasClass('on')) {
-            $('#playlist').append(
-                $(this).clone().append($('<button>').attr('class', 'btn btn-sm btn-default assign1-button').append(
-                        '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <strong>1</strong>')
-                ).append($('<button>').attr('class', 'btn btn-sm btn-default assign2-button').append(
-                        '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <strong>2</strong>')
-                )
-            );
-        } else {
-            $('#playlist [data-video-id = '+videoId+']').remove();
-        }
-    });
+    $(document).on('click', '#list .movie', cloneThumbnailToPlaylist);
 
     $(document).on('click', '#playlist .assign1-button', function(){
         var $dfd = new $.Deferred;
@@ -157,3 +107,58 @@ $(function() {
         }
     });
 });
+
+function curlYoutubeThumbnail() {
+    var url = "https://www.googleapis.com/youtube/v3/search";
+    var options = {
+        key: "AIzaSyDx3H3XYL6KiYgcKa5zIBf95OixQFpohkU",
+        part: "snippet",
+        q: $('#q').val(),
+        type: "video",
+        maxResults: 10
+    };
+
+    $.get(url, options, function(rs){
+        console.log(rs);
+        $('#list').empty();
+        for (var i = 0; i < rs.items.length; i++) {
+            var item = rs.items[i];
+            $('#list').append(
+                $('<li class="movie">').append(
+                    $('<img>').attr({
+                        'src': item['snippet']['thumbnails']['default']['url'],
+                        'class': 'img-thumbnail'
+                    })
+                ).attr('data-video-id', item['id']['videoId']).append(
+                    $('<li>').append(
+                        $('<p class="title">').append(function(){
+                            var txt = item['snippet']['title'];
+                            if(txt.length > 41){
+                                txt = txt.substr(0, 41);
+                                $(this).text(txt + "…");
+                            }
+                            else return txt;
+                        })
+                    )
+                )
+            );
+        }
+    }, "json")
+}
+
+function cloneThumbnailToPlaylist() {
+    var videoId = $(this).data('video-id');
+    $(this).toggleClass('on');
+
+    if ($(this).hasClass('on')) {
+        $('#playlist').append(
+            $(this).clone().append($('<button>').attr('class', 'btn btn-sm btn-default assign1-button').append(
+                    '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <strong>1</strong>')
+            ).append($('<button>').attr('class', 'btn btn-sm btn-default assign2-button').append(
+                    '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <strong>2</strong>')
+            )
+        );
+    } else {
+        $('#playlist [data-video-id = '+videoId+']').remove();
+    }
+}
