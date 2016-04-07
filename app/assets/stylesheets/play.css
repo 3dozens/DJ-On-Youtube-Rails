@@ -86,3 +86,8 @@ p.title {
 .glyphicon-volume-up {
     font-size: 25px;
 }
+
+canvas {
+    background-color: #000035;
+    box-shadow: 3px 3px 10px 5px rgba(0, 0, 0, 0.4);
+}

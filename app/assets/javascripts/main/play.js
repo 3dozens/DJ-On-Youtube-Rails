@@ -76,16 +76,28 @@ $(function() {
     $(document).on('click', '#playlist .assign1-button', function(){
         var $dfd = new $.Deferred;
         var videoId = $($(this).parent()).data('video-id');
+
         loadSounds([videoId], $dfd).then(function() {
             currentSoundInstance1 = createjs.Sound.createInstance(videoId);
+
+            var audioBuffer = currentSoundInstance1.playbackResource;
+            var channelLAudioData = new Float32Array(audioBuffer.length);
+            channelLAudioData.set(audioBuffer.getChannelData(0));
+            drawWaveform($("#waveform1")[0], channelLAudioData, audioBuffer.sampleRate);
         });
     });
 
     $(document).on('click', '#playlist .assign2-button', function(){
         var $dfd = new $.Deferred;
         var videoId = $($(this).parent()).data('video-id');
+
         loadSounds([videoId], $dfd).then(function() {
-            currentSoundInstance2 = createjs.Sound.createInstance(videoId)
+            currentSoundInstance2 = createjs.Sound.createInstance(videoId);
+
+            var audioBuffer = currentSoundInstance2.playbackResource;
+            var channelLAudioData = new Float32Array(audioBuffer.length);
+            channelLAudioData.set(audioBuffer.getChannelData(0));
+            drawWaveform($("#waveform2")[0], channelLAudioData, audioBuffer.sampleRate);
         });
     });
 
@@ -106,6 +118,7 @@ $(function() {
             currentSoundInstance2.paused = !currentSoundInstance2.paused;
         }
     });
+
 });
 
 function curlYoutubeThumbnail() {
