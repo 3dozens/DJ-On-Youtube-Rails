@@ -79,11 +79,7 @@ $(function() {
 
         loadSounds([videoId], $dfd).then(function() {
             currentSoundInstance1 = createjs.Sound.createInstance(videoId);
-
-            var audioBuffer = currentSoundInstance1.playbackResource;
-            var channelLAudioData = new Float32Array(audioBuffer.length);
-            channelLAudioData.set(audioBuffer.getChannelData(0));
-            drawWaveform($("#waveform1")[0], channelLAudioData, audioBuffer.sampleRate);
+            drawWaveformToTurntable(currentSoundInstance1, $("#waveform1")[0]);
         });
     });
 
@@ -93,11 +89,7 @@ $(function() {
 
         loadSounds([videoId], $dfd).then(function() {
             currentSoundInstance2 = createjs.Sound.createInstance(videoId);
-
-            var audioBuffer = currentSoundInstance2.playbackResource;
-            var channelLAudioData = new Float32Array(audioBuffer.length);
-            channelLAudioData.set(audioBuffer.getChannelData(0));
-            drawWaveform($("#waveform2")[0], channelLAudioData, audioBuffer.sampleRate);
+            drawWaveformToTurntable(currentSoundInstance2, $("#waveform2")[0]);
         });
     });
 
@@ -174,4 +166,12 @@ function cloneThumbnailToPlaylist() {
     } else {
         $('#playlist [data-video-id = '+videoId+']').remove();
     }
+}
+
+function drawWaveformToTurntable(soundInstance, canvas) {
+    var audioBuffer = soundInstance.playbackResource;
+    var channelLAudioData = new Float32Array(audioBuffer.length);
+    channelLAudioData.set(audioBuffer.getChannelData(0));
+
+    drawWaveform(canvas, channelLAudioData, audioBuffer.sampleRate);
 }
