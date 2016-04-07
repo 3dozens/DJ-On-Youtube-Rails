@@ -16,7 +16,8 @@ class Youtube < ActiveRecord::Base
   private
 
   def self.download_video(video_id)
-    cmd = %Q{youtube-dl -x --audio-format "mp3" -o "./public/downloaded_files/%(id)s.%(ext)s" #{video_id}}
+    # "-"を含むビデオIDだと上手く動かないため、フルURLを使用
+    cmd = %Q{youtube-dl -x --audio-format "mp3" -o "./public/downloaded_files/%(id)s.%(ext)s" https://www.youtube.com/watch\?v\=#{video_id}}
 
     Process.fork do
       Process.exec cmd
