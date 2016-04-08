@@ -97,22 +97,12 @@ $(function() {
         });
     });
 
-    $(document).on('click', '#play1', function(){
-        //そのインスタンスでの初回の再生の場合、play()する
-        if (currentSoundInstance1.playState === null) {
-            currentSoundInstance1.play();
-        } else {
-            currentSoundInstance1.paused = !currentSoundInstance1.paused;
-        }
+    $(document).on('click', '#play1', function() {
+        play(currentSoundInstance1);
     });
 
     $(document).on('click', '#play2', function(){
-        //そのインスタンスでの初回の再生の場合、play()する
-        if (currentSoundInstance2.playState === null) {
-            currentSoundInstance2.play();
-        } else {
-            currentSoundInstance2.paused = !currentSoundInstance2.paused;
-        }
+        play(currentSoundInstance2);
     });
 
 });
@@ -178,4 +168,13 @@ function drawWaveformToTurntable(soundInstance, canvas) {
     channelLAudioData.set(audioBuffer.getChannelData(0));
 
     drawWaveform(canvas, channelLAudioData, audioBuffer.sampleRate);
+}
+
+function play(soundInstance) {
+    //そのインスタンスでの初回の再生の場合、play()する
+    if (soundInstance.playState === null) {
+        soundInstance.play();
+    } else {
+        soundInstance.paused = !soundInstance.paused;
+    }
 }
