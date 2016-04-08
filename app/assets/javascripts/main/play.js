@@ -75,24 +75,24 @@ $(function() {
 
     $(document).on('click', '#playlist .assign1-button', function(){
         var $dfd = new $.Deferred;
-        var videoName = $($(this).parent()).find(".title")[0].innerHTML;
+        var videoName = $($(this).parent()).find(".title").html();
         var videoId = $($(this).parent()).data('video-id');
 
         loadSounds([videoId], $dfd).then(function() {
             currentSoundInstance1 = createjs.Sound.createInstance(videoId);
-            $("#title1")[0].innerHTML = videoName;
+            $("#title1").html(videoName);
             drawWaveformToTurntable(currentSoundInstance1, $("#waveform1")[0]);
         });
     });
 
     $(document).on('click', '#playlist .assign2-button', function(){
         var $dfd = new $.Deferred;
-        var videoName = $($(this).parent()).find(".title")[0].innerHTML;
+        var videoName = $($(this).parent()).find(".title").html();
         var videoId = $($(this).parent()).data('video-id');
 
         loadSounds([videoId], $dfd).then(function() {
             currentSoundInstance2 = createjs.Sound.createInstance(videoId);
-            $("#title2")[0].innerHTML = videoName;
+            $("#title2").html(videoName);
             drawWaveformToTurntable(currentSoundInstance2, $("#waveform2")[0]);
         });
     });
