@@ -97,7 +97,7 @@ $(function() {
         });
     });
 
-    $(document).on('click', '#play1', function() {
+    $('#play1').on('click', function() {
         //再生が完了していた場合、インスタンスを作りなおす
         if (currentSoundInstance1.playState === createjs.Sound.PLAY_FINISHED) {
             currentSoundInstance1 = createjs.Sound.createInstance(getSoundId(currentSoundInstance1));
@@ -105,7 +105,7 @@ $(function() {
         play(currentSoundInstance1);
     });
 
-    $(document).on('click', '#play2', function(){
+    $('#play2').on('click', function(){
         //再生が完了していた場合、インスタンスを作りなおす
         if (currentSoundInstance2.playState === createjs.Sound.PLAY_FINISHED) {
             currentSoundInstance2 = createjs.Sound.createInstance(getSoundId(currentSoundInstance2));
@@ -187,7 +187,7 @@ function getMouseXInElement(event) {
 
     if (event.targetTouches) { // for tablet
         elmX = event.targetTouches[0].pageX - event.target.offsetLeft;
-    } else if (document.all || 'all' in document) { // for IE
+    } else if (document.all || 'all' in document) {
         elmX = event.offsetX;
     } else {
         elmX = event.layerX;
