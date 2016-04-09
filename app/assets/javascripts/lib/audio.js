@@ -1,3 +1,24 @@
+var paddingTop    = 10;
+var paddingBottom = 10;
+var paddingLeft   = 20;
+var paddingRight  = 20;
+
+var canvasWidth;
+var canvasheight;
+
+var innerWidth;
+var innerHeight;
+var innerBottom;
+
+$(function() {
+    canvasWidth = $("canvas")[0].width;
+    canvasheight = $("canvas")[0].height;
+
+    innerWidth = canvasWidth - paddingLeft - paddingRight;
+    innerHeight = canvasheight - paddingTop - paddingBottom;
+    innerBottom = canvasheight - paddingBottom;
+});
+
 /**
  * Web Audio APIが使えるか確認しつつ、contextをつくる
  * @returns AudioContext
@@ -83,7 +104,9 @@ function deleteSounds(videoIds, dfd) {
 
     $.ajax({
         url: requestURL,
-        success: function() { dfd.resolve(); }
+        success: function () {
+            dfd.resolve();
+        }
     });
 }
 
@@ -105,6 +128,14 @@ function getVideoId(url) {
     return decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]);
 }
 
+function drawWaveformToCanvas(soundInstance, canvas) {
+    var audioBuffer = soundInstance.playbackResource;
+    var channelLAudioData = new Float32Array(audioBuffer.length);
+    channelLAudioData.set(audioBuffer.getChannelData(0));
+
+    drawWaveform(canvas, channelLAudioData, audioBuffer.sampleRate);
+}
+
 /**
  * 波形を描画します
  * @param canvas canvas要素
@@ -113,18 +144,6 @@ function getVideoId(url) {
  */
 function drawWaveform(canvas, data, sampleRate) {
     var canvasContext = canvas.getContext('2d');
-
-    var width  = canvas.width;
-    var height = canvas.height;
-
-    var paddingTop    = 10;
-    var paddingBottom = 10;
-    var paddingLeft   = 20;
-    var paddingRight  = 20;
-
-    var innerWidth  = width  - paddingLeft - paddingRight;
-    var innerHeight = height - paddingTop  - paddingBottom;
-    var innerBottom = height - paddingBottom;
 
     var middle = (innerHeight / 2) + paddingTop;
 
@@ -138,7 +157,7 @@ function drawWaveform(canvas, data, sampleRate) {
     var n60sec = Math.floor(60 * sampleRate);
 
     // Clear previous data
-    canvasContext.clearRect(0, 0, width, height);
+    canvasContext.clearRect(0, 0, canvasWidth, canvasheight);
 
     // Draw audio wave
     canvasContext.beginPath();
@@ -158,7 +177,7 @@ function drawWaveform(canvas, data, sampleRate) {
 
         // 60 sec ?
         if ((i % n60sec) === 0) {
-            var sec  = i * period;  // index -> time
+            var sec = i * period;  // index -> time
             var text = Math.floor(sec) + ' sec';
 
             // Draw grid (X)
@@ -167,21 +186,44 @@ function drawWaveform(canvas, data, sampleRate) {
 
             // Draw text (X)
             canvasContext.fillStyle = 'rgba(255, 255, 255, 1.0)';
-            canvasContext.font      = '16px "Times New Roman"';
-            canvasContext.fillText(text, (x - (canvasContext.measureText(text).width / 2)), (height - 3));
+            canvasContext.font      = '16px "Times New Roman"';
+            canvasContext.fillText(text, (x - (canvasContext.measureText(text).width / 2)), (canvasheight - 3));
         }
     }
 
     canvasContext.strokeStyle = 'rgba(0, 0, 255, 1.0)';
-    canvasContext.lineWidth   = 0.5;
-    canvasContext.lineCap     = 'round';
-    canvasContext.lineJoin    = 'miter';
+    canvasContext.lineWidth   = 0.5;
+    canvasContext.lineCap     = 'round';
+    canvasContext.lineJoin    = 'miter';
     canvasContext.stroke();
 
     // Draw grid (Y)
     canvasContext.fillStyle = 'rgba(255, 0, 0, 1.0)';
-    canvasContext.fillRect(paddingLeft, middle,      innerWidth, 1);
-    canvasContext.fillRect(paddingLeft, paddingTop,  innerWidth, 1);
+    canvasContext.fillRect(paddingLeft, middle, innerWidth, 1);
+    canvasContext.fillRect(paddingLeft, paddingTop, innerWidth, 1);
     canvasContext.fillRect(paddingLeft, innerBottom, innerWidth, 1);
 
+}
+
+function play(soundInstance) {
+    //そのインスタンスでの初回の再生の場合、play()する
+    if (soundInstance.playState === null) {
+        soundInstance.play();
+    } else if (soundInstance.playState === createjs.Sound.PLAY_FINISHED) {
+        return createjs.Sound.play(getSoundId(soundInstance));
+    } else {
+        soundInstance.paused = !soundInstance.paused;
+    }
+}
+
+function seekSound(soundInstance, x) {
+    x -= paddingLeft; //計算上padding分は邪魔なので除去
+    if (x < 0 || innerWidth < x) { return; } // paddingの部分のクリックの場合、シークしない
+
+    var normalizedX = x / canvasWidth; //正規化
+    var seekPoint = soundInstance.duration * normalizedX;
+
+    soundInstance.position = seekPoint;
+
+    //TODO: 再生位置を示す赤線の移動
 }

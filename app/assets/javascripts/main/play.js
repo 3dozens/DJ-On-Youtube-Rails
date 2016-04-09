@@ -81,7 +81,7 @@ $(function() {
         loadSounds([videoId], $dfd).then(function() {
             currentSoundInstance1 = createjs.Sound.createInstance(videoId);
             $("#title1").html(videoName);
-            drawWaveformToTurntable(currentSoundInstance1, $("#waveform1")[0]);
+            drawWaveformToCanvas(currentSoundInstance1, $("#waveform1")[0]);
         });
     });
 
@@ -93,16 +93,34 @@ $(function() {
         loadSounds([videoId], $dfd).then(function() {
             currentSoundInstance2 = createjs.Sound.createInstance(videoId);
             $("#title2").html(videoName);
-            drawWaveformToTurntable(currentSoundInstance2, $("#waveform2")[0]);
+            drawWaveformToCanvas(currentSoundInstance2, $("#waveform2")[0]);
         });
     });
 
     $(document).on('click', '#play1', function() {
+        //再生が完了していた場合、インスタンスを作りなおす
+        if (currentSoundInstance1.playState === createjs.Sound.PLAY_FINISHED) {
+            currentSoundInstance1 = createjs.Sound.createInstance(getSoundId(currentSoundInstance1));
+        }
         play(currentSoundInstance1);
     });
 
     $(document).on('click', '#play2', function(){
+        //再生が完了していた場合、インスタンスを作りなおす
+        if (currentSoundInstance2.playState === createjs.Sound.PLAY_FINISHED) {
+            currentSoundInstance2 = createjs.Sound.createInstance(getSoundId(currentSoundInstance2));
+        }
         play(currentSoundInstance2);
+    });
+
+    $("#waveform1").on("click", function(event) {
+        var x = getMouseXInElement(event);
+        seekSound(currentSoundInstance1, x);
+    });
+
+    $("#waveform2").on("click", function(event) {
+        var x = getMouseXInElement(event);
+        seekSound(currentSoundInstance2, x);
     });
 
 });
@@ -162,19 +180,18 @@ function cloneThumbnailToPlaylist() {
     }
 }
 
-function drawWaveformToTurntable(soundInstance, canvas) {
-    var audioBuffer = soundInstance.playbackResource;
-    var channelLAudioData = new Float32Array(audioBuffer.length);
-    channelLAudioData.set(audioBuffer.getChannelData(0));
+function getMouseXInElement(event) {
+    if (!event) { event = window.event; }
 
-    drawWaveform(canvas, channelLAudioData, audioBuffer.sampleRate);
-}
+    var elmX;
 
-function play(soundInstance) {
-    //そのインスタンスでの初回の再生の場合、play()する
-    if (soundInstance.playState === null) {
-        soundInstance.play();
+    if (event.targetTouches) { // for tablet
+        elmX = event.targetTouches[0].pageX - event.target.offsetLeft;
+    } else if (document.all || 'all' in document) { // for IE
+        elmX = event.offsetX;
     } else {
-        soundInstance.paused = !soundInstance.paused;
+        elmX = event.layerX;
     }
+
+    return elmX;
 }
