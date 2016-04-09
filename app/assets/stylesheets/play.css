@@ -2,6 +2,10 @@ body {
     text-align: center;
 }
 
+h2 {
+    margin-bottom: 2px;
+}
+
 div.turntables-container {
     width: 1350px;
     height: 500px;
@@ -85,4 +89,13 @@ p.title {
 
 .glyphicon-volume-up {
     font-size: 25px;
+}
+
+.title {
+    margin-bottom: 10px;
+}
+
+canvas {
+    background-color: #000035;
+    box-shadow: 3px 3px 10px 5px rgba(0, 0, 0, 0.4);
 }
