@@ -6,7 +6,7 @@
       <h2>Turntable 1</h2>
       <div class="title" id="title1"></div>
       <div id="player1">
-        <button id="play1" type="button">play/stop</button>
+        <button class="btn btn-default" id="play1" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
         <canvas id="waveform1" height="120" width="520"></canvas>
       </div>
     </div>
@@ -15,16 +15,18 @@
       <h2>Turntable 2</h2>
       <div class="title" id="title2"></div>
       <div id="player2">
-        <button id="play2" type="button">play/stop</button>
+        <button class="btn btn-default" id="play2" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
         <canvas id="waveform2" height="120" width="520"></canvas>
       </div>
     </div>
   </div>
 </div>
 <span class="glyphicon glyphicon-volume-up" aria-hidden="true"></span>
-<div class="vertical-sliders-container">
-  <p class="vertical-slider" id="vertical-slider1"></p>
-  <p class="vertical-slider" id="vertical-slider2"></p>
+<div class="row">
+  <div class="col-md-offset-3 col-md-1"><p class="pitch-slider" id="pitch-slider1"></p></div>
+  <div class="col-md-1"><p class="vertical-slider" id="vertical-slider1"></p></div>
+  <div class="col-md-offset-2 col-md-1"><p class="vertical-slider" id="vertical-slider2"></p></div>
+  <div class="col-md-1"><p class="pitch-slider" id="pitch-slider2"></p></div>
 </div>
 <div id="holizontal-slider"></div>
 <hr>
@@ -34,11 +36,6 @@
     <input class="btn btn-primary" type="submit" value="Search!">
   </div>
 </form>
-<hr>
-<button class="btn btn-default" id="prev"><span class="glyphicon glyphicon-fast-backward" aria-hidden="true"></span>&nbsp; Prev</button>
-<button class="btn btn-default" id="play">Play &nbsp;<span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
-<button class="btn btn-default" id="pause">Pause &nbsp;<span class="glyphicon glyphicon-pause" aria-hidden="true"></span></button>
-<button class="btn btn-default" id="next">Next &nbsp;<span class="glyphicon glyphicon-fast-forward" aria-hidden="true"></span></button>
 <hr>
 <p>Tracklist <span class="glyphicon glyphicon-list" aria-hidden="true"></span></p>
 <div class="row list-container">
