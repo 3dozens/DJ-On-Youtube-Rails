@@ -69,14 +69,41 @@ $(function() {
         }
     });
 
+    //左ピッチスライダー
+    $( "#pitch-slider1" ).slider({
+        orientation: "vertical",
+        range: "min",
+        min: 0,
+        max: 2,
+        step: 0.01,
+        value: 1.0, //ピッチの初期値
+        slide: function( event, ui ) {
+            changePitch(currentSoundInstance1, ui.value);
+        }
+    });
+
+    //右ピッチスライダー
+    $( "#pitch-slider2" ).slider({
+        orientation: "vertical",
+        range: "min",
+        min: 0,
+        max: 2,
+        step: 0.01,
+        value: 1.0, //音量の初期値
+        slide: function( event, ui ) {
+            changePitch(currentSoundInstance2, ui.value);
+        }
+    });
+
     $('#search').submit(curlYoutubeThumbnail);
 
     $(document).on('click', '#list .movie', cloneThumbnailToPlaylist);
 
     $(document).on('click', '#playlist .assign1-button', function(){
         var $dfd = new $.Deferred;
-        var videoName = $($(this).parent()).find(".title").html();
-        var videoId = $($(this).parent()).data('video-id');
+        var movie = $(this).parent();
+        var videoName = $(movie).find(".title").html();
+        var videoId = $(movie).data('video-id');
 
         loadSounds([videoId], $dfd).then(function() {
             currentSoundInstance1 = createjs.Sound.createInstance(videoId);
@@ -98,29 +125,47 @@ $(function() {
     });
 
     $('#play1').on('click', function() {
+        if (currentSoundInstance1 === undefined) { return; } //曲がロードされていない場合、なにもしない
+
         //再生が完了していた場合、インスタンスを作りなおす
         if (currentSoundInstance1.playState === createjs.Sound.PLAY_FINISHED) {
             currentSoundInstance1 = createjs.Sound.createInstance(getSoundId(currentSoundInstance1));
         }
-        play(currentSoundInstance1);
+
+        togglePlayAndPause(currentSoundInstance1, $("#pitch-slider1").slider("value"));
+
+        if (currentSoundInstance1.paused === true) {
+            $("#play1").html('<span class="glyphicon glyphicon-play" aria-hidden="true"></span>');
+        } else {
+            $("#play1").html('<span class="glyphicon glyphicon-pause" aria-hidden="true"></span>');
+        }
     });
 
     $('#play2').on('click', function(){
+        if (currentSoundInstance2 === undefined) { return; } //曲がロードされていない場合、なにもしない
+
         //再生が完了していた場合、インスタンスを作りなおす
         if (currentSoundInstance2.playState === createjs.Sound.PLAY_FINISHED) {
             currentSoundInstance2 = createjs.Sound.createInstance(getSoundId(currentSoundInstance2));
         }
-        play(currentSoundInstance2);
+
+        togglePlayAndPause(currentSoundInstance2, $("#pitch-slider2").slider("value"));
+
+        if (currentSoundInstance2.paused === true) {
+            $("#play2").html('<span class="glyphicon glyphicon-play" aria-hidden="true"></span>');
+        } else {
+            $("#play2").html('<span class="glyphicon glyphicon-pause" aria-hidden="true"></span>');
+        }
     });
 
     $("#waveform1").on("click", function(event) {
         var x = getMouseXInElement(event);
-        seekSound(currentSoundInstance1, x);
+        seekSound(currentSoundInstance1, $("#pitch-slider1").slider("value"), x);
     });
 
     $("#waveform2").on("click", function(event) {
         var x = getMouseXInElement(event);
-        seekSound(currentSoundInstance2, x);
+        seekSound(currentSoundInstance2, $("#pitch-slider2").slider("value"), x);
     });
 
 });

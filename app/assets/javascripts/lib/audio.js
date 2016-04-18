@@ -205,18 +205,22 @@ function drawWaveform(canvas, data, sampleRate) {
 
 }
 
-function play(soundInstance) {
+function togglePlayAndPause(soundInstance, pitch) {
     //そのインスタンスでの初回の再生の場合、play()する
     if (soundInstance.playState === null) {
         soundInstance.play();
-    } else if (soundInstance.playState === createjs.Sound.PLAY_FINISHED) {
-        return createjs.Sound.play(getSoundId(soundInstance));
     } else {
         soundInstance.paused = !soundInstance.paused;
     }
+
+    //pauseする度にaudioBufferSourceNodeが作りなおされピッチが初期化されてしまうため、
+    //再生するごとに毎回ピッチを設定する
+    if (soundInstance.playState === createjs.Sound.PLAY_SUCCEEDED && soundInstance.paused === false) {
+        changePitch(soundInstance, pitch);
+    }
 }
 
-function seekSound(soundInstance, x) {
+function seekSound(soundInstance, pitch, x) {
     x -= paddingLeft; //計算上padding分は邪魔なので除去
     if (x < 0 || innerWidth < x) { return; } // paddingの部分のクリックの場合、シークしない
 
@@ -225,5 +229,14 @@ function seekSound(soundInstance, x) {
 
     soundInstance.position = seekPoint;
 
+    //シークする度にピッチが初期化されてしまうため、毎回ピッチを設定する
+    if (soundInstance.playState === createjs.Sound.PLAY_SUCCEEDED && soundInstance.paused === false) {
+        changePitch(soundInstance, pitch);
+    }
+
     //TODO: 再生位置を示す赤線の移動
+}
+
+function changePitch(soundInstance, pitch) {
+    soundInstance.sourceNode.playbackRate.value = pitch;
 }

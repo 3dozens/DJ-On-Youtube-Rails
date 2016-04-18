@@ -1,5 +1,6 @@
 body {
     text-align: center;
+    font-family: 'Open Sans', sans-serif;
 }
 
 h2 {
@@ -11,7 +12,7 @@ div.turntables-container {
     height: 500px;
 }
 
-div.vertical-sliders-container {
+div.sliders-container {
     width: 500px;
     height: 460px;
     margin: 0 auto;
@@ -28,6 +29,18 @@ p#vertical-slider1 {
 }
 
 p#vertical-slider2 {
+    float: right;
+}
+
+.pitch-slider {
+    height: 350px;
+}
+
+#pitch-slider1 {
+    float: left;
+}
+
+#pitch-slider2 {
     float: right;
 }
 
