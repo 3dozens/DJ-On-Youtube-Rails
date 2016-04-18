@@ -1,3 +1,4 @@
+//TODO: 音声処理とcanvasへの描画処理が混在しているので、分離する
 var paddingTop    = 10;
 var paddingBottom = 10;
 var paddingLeft   = 20;
@@ -111,11 +112,11 @@ function deleteSounds(videoIds, dfd) {
 }
 
 /**
- * soundInstanceからsoundIdを取得します
+ * soundInstanceからvideoIdを取得します deprecated
  * @param soundInstance
- * @returns soundId
+ * @returns videoId
  */
-function getSoundId(soundInstance) {
+function getVideoId(soundInstance) {
     return soundInstance.src.match(/\/downloaded_files\/(.*)\.mp3/)[1];
 }
 
@@ -124,7 +125,7 @@ function getSoundId(soundInstance) {
  * @param url Youtubeの動画URL
  * @returns {string} ビデオID
  */
-function getVideoId(url) {
+function getVideoIdFromURL(url) {
     return decodeURIComponent(url.match(/.*v%3D(.*)$/)[1]);
 }
 
@@ -150,10 +151,10 @@ function drawWaveform(canvas, data, sampleRate) {
     // Sampling period
     var period = 1 / sampleRate;
 
-    // This value is the number of samples during 50 msec
+    // Number of samples during 50 msec
     var n50msec = Math.floor(50 * Math.pow(10, -3) * sampleRate);
 
-    // This value is the number of samples during 60 sec
+    // Number of samples during 60 sec
     var n60sec = Math.floor(60 * sampleRate);
 
     // Clear previous data
@@ -205,38 +206,57 @@ function drawWaveform(canvas, data, sampleRate) {
 
 }
 
-function togglePlayAndPause(soundInstance, pitch) {
-    //そのインスタンスでの初回の再生の場合、play()する
-    if (soundInstance.playState === null) {
-        soundInstance.play();
-    } else {
-        soundInstance.paused = !soundInstance.paused;
-    }
+/**
+ * soundjsのaudioInstanceに各種プロパティとメソッドを追加した
+ * オブジェクトを返すコンストラクタ
+ * @returns {AbstractSoundInstance}
+ * @constructor
+ */
+function Sound(videoId, pitch) {
+    var self = createjs.Sound.createInstance(videoId);
 
-    //pauseする度にaudioBufferSourceNodeが作りなおされピッチが初期化されてしまうため、
-    //再生するごとに毎回ピッチを設定する
-    if (soundInstance.playState === createjs.Sound.PLAY_SUCCEEDED && soundInstance.paused === false) {
-        changePitch(soundInstance, pitch);
-    }
-}
+    //-----property-----//
+    self.videoId = videoId;
+    self.pitch = pitch;
 
-function seekSound(soundInstance, pitch, x) {
-    x -= paddingLeft; //計算上padding分は邪魔なので除去
-    if (x < 0 || innerWidth < x) { return; } // paddingの部分のクリックの場合、シークしない
+    //-----method-----//
+    self.togglePlay = function() {
+        //そのインスタンスでの初回の再生の場合、play()する
+        if (this.playState === null) {
+            this.play();
+        } else {
+            this.paused = !this.paused;
+        }
 
-    var normalizedX = x / canvasWidth; //正規化
-    var seekPoint = soundInstance.duration * normalizedX;
+        //pauseする度にaudioBufferSourceNodeが作りなおされピッチが初期化されてしまうため、
+        //再生するごとに毎回ピッチを設定する
+        if (this.playState === createjs.Sound.PLAY_SUCCEEDED && this.paused === false) {
+            this.changePitch(this.pitch);
+        }
 
-    soundInstance.position = seekPoint;
+    };
 
-    //シークする度にピッチが初期化されてしまうため、毎回ピッチを設定する
-    if (soundInstance.playState === createjs.Sound.PLAY_SUCCEEDED && soundInstance.paused === false) {
-        changePitch(soundInstance, pitch);
-    }
+    self.changePitch = function(pitch) {
+        this.pitch = pitch;
+        this.sourceNode.playbackRate.value = pitch;
+    };
 
-    //TODO: 再生位置を示す赤線の移動
-}
+    self.seekSound = function(x) {
+        x -= paddingLeft; //計算上padding分は邪魔なので除去
+        if (x < 0 || innerWidth < x) { return; } // paddingの部分のクリックの場合、シークしない
 
-function changePitch(soundInstance, pitch) {
-    soundInstance.sourceNode.playbackRate.value = pitch;
+        var normalizedX = x / canvasWidth; //正規化
+        var seekPoint = this.duration * normalizedX;
+
+        this.position = seekPoint;
+
+        //シークする度にピッチが初期化されてしまうため、毎回ピッチを設定する
+        if (this.playState === createjs.Sound.PLAY_SUCCEEDED && this.paused === false) {
+            this.changePitch(this.pitch);
+        }
+
+        //TODO: 再生位置を示す赤線の移動
+    };
+
+    return self
 }
