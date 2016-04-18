@@ -220,7 +220,11 @@ function Sound(videoId, pitch) {
     self.pitch = pitch;
 
     //-----method-----//
-    self.togglePlay = function() {
+
+    //** volume optional
+    self.togglePlay = function(volume) {
+        if (volume !== undefined) { self.volume = volume }
+
         //そのインスタンスでの初回の再生の場合、play()する
         if (this.playState === null) {
             this.play();

@@ -2,8 +2,6 @@ $(function() {
     var currentSound1;
     var currentSound2;
 
-    //TODO: それぞれのターンテーブルのデフォルト音量を設定する
-
     $('#q').focus();
 
     //左縦フェーダー
@@ -135,7 +133,7 @@ $(function() {
             currentSound1 = new Sound(currentSound1.videoId, $("#pitch-slider1").slider("value"));
         }
 
-        currentSound1.togglePlay();
+        currentSound1.togglePlay($("#vertical-slider1").slider("value"));
         togglePlayIcon(currentSound1, $("#play1"));
     });
 
@@ -147,7 +145,7 @@ $(function() {
             currentSound2 = new Sound(currentSound1.videoId, $("#pitch-slider1").slider("value"));
         }
 
-        currentSound2.togglePlay();
+        currentSound2.togglePlay($("#vertical-slider2").slider("value"));
         togglePlayIcon(currentSound2, $("#play2"));
     });
 
