@@ -230,7 +230,7 @@ function Sound(videoId, pitch) {
 
         //pauseする度にaudioBufferSourceNodeが作りなおされピッチが初期化されてしまうため、
         //再生するごとに毎回ピッチを設定する
-        if (this.playState === createjs.Sound.PLAY_SUCCEEDED && this.paused === false) {
+        if (this.isPlaying()) {
             this.changePitch(this.pitch);
         }
 
@@ -238,7 +238,9 @@ function Sound(videoId, pitch) {
 
     self.changePitch = function(pitch) {
         this.pitch = pitch;
-        this.sourceNode.playbackRate.value = pitch;
+        if (this.isPlaying()) {
+            this.sourceNode.playbackRate.value = pitch;
+        }
     };
 
     self.seekSound = function(x) {
@@ -251,11 +253,15 @@ function Sound(videoId, pitch) {
         this.position = seekPoint;
 
         //シークする度にピッチが初期化されてしまうため、毎回ピッチを設定する
-        if (this.playState === createjs.Sound.PLAY_SUCCEEDED && this.paused === false) {
+        if (this.isPlaying()) {
             this.changePitch(this.pitch);
         }
 
         //TODO: 再生位置を示す赤線の移動
+    };
+
+    self.isPlaying = function() {
+        return this.playState === createjs.Sound.PLAY_SUCCEEDED && this.paused === false;
     };
 
     return self

@@ -2,10 +2,7 @@ $(function() {
     var currentSound1;
     var currentSound2;
 
-    //var ppc = new createjs.PlayPropsConfig().set({volume: 0.5});
-    //createjs.Sound.setDefaultPlayProps = ppc;
     //TODO: それぞれのターンテーブルのデフォルト音量を設定する
-    //TODO: それぞれのターンテーブルのデフォルトピッチを設定する
 
     $('#q').focus();
 
@@ -161,6 +158,8 @@ $(function() {
     $("#waveform2").on("click", function(event) {
         currentSound2.seekSound(getMouseXInElement(event));
     });
+
+    //-----functions-----//
 
     function curlYoutubeThumbnail() {
         var url = "https://www.googleapis.com/youtube/v3/search";
