@@ -12,6 +12,10 @@ div.turntables-container {
     height: 500px;
 }
 
+#playButton1 {
+    text-align: left;
+}
+
 div.sliders-container {
     width: 500px;
     height: 460px;

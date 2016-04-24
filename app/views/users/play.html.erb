@@ -2,21 +2,23 @@
 <hr>
 <div class="turntables-container">
   <div class="row">
-    <div class="col-md-6">
+    <div class="col-md-6" id="turntable1">
       <h2>Turntable 1</h2>
       <div class="title" id="title1"></div>
       <div id="player1">
-        <button class="btn btn-default" id="play1" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
-        <canvas id="waveform1" height="120" width="520"></canvas>
+        <canvas id="waveform1" height="120" width="520"></canvas><br>
+        <button class="btn btn-default" id="playButton1" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+        <div id="player1bpm"></div>
       </div>
     </div>
 
-    <div class="col-md-6">
+    <div class="col-md-6" id="turntable2">
       <h2>Turntable 2</h2>
       <div class="title" id="title2"></div>
       <div id="player2">
-        <button class="btn btn-default" id="play2" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
         <canvas id="waveform2" height="120" width="520"></canvas>
+        <button class="btn btn-default" id="playButton2" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
+        <div id="player2bpm"></div>
       </div>
     </div>
   </div>

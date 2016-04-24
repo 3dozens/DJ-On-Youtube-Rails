@@ -104,7 +104,7 @@ $(function() {
         var videoId = $(movie).data('video-id');
 
         loadSounds([videoId], $dfd).then(function() {
-            currentSound1 = new Sound(videoId);
+            currentSound1 = new Sound(videoId, $("#pitch-slider1").slider("value"), $("#player1bpm"));
             $("#title1").html(videoName);
             drawWaveformToCanvas(currentSound1, $("#waveform1")[0]);
         });
@@ -112,41 +112,41 @@ $(function() {
 
     $(document).on('click', '#playlist .assign2-button', function(){
         var $dfd = new $.Deferred;
-        var movie = $(this).parent();
+        var movie = $(this).parent(); //TODO: 相対位置指定は拡張性を損なうので修正する
         var videoName = $(movie).find(".title").html();
         var videoId = $(movie).data('video-id');
 
         loadSounds([videoId], $dfd).then(function() {
-            currentSound2 = new Sound(videoId);
+            currentSound2 = new Sound(videoId, $("#pitch-slider2").slider("value"), $("#player2bpm"));
             $("#title2").html(videoName);
-            drawWaveformToCanvas(currentSound1, $("#waveform2")[0]);
+            drawWaveformToCanvas(currentSound2, $("#waveform2")[0]);
         });
     });
 
     //コールバックを関数に切り出したかったが、currentSoundがundefinedの場合参照渡しすることができず
     //currentSoundにnewしたSoundを代入しても反映されないため直に書いています
-    $('#play1').on('click', function() {
+    $('#playButton1').on('click', function() {
         if (currentSound1 === undefined) { return; } //曲がロードされていない場合、なにもしない
 
         //再生が完了していた場合、インスタンスを作りなおす
         if (currentSound1.playState === createjs.Sound.PLAY_FINISHED) {
-            currentSound1 = new Sound(currentSound1.videoId, $("#pitch-slider1").slider("value"));
+            currentSound1 = new Sound(currentSound1.videoId, $("#pitch-slider1").slider("value"), $("#player1bpm"));
         }
 
         currentSound1.togglePlay($("#vertical-slider1").slider("value"));
-        togglePlayIcon(currentSound1, $("#play1"));
+        togglePlayIcon(currentSound1, $("#playButton1"));
     });
 
-    $('#play2').on('click', function(){
+    $('#playButton2').on('click', function() {
         if (currentSound2 === undefined) { return; } //曲がロードされていない場合、なにもしない
 
         //再生が完了していた場合、インスタンスを作りなおす
         if (currentSound2.playState === createjs.Sound.PLAY_FINISHED) {
-            currentSound2 = new Sound(currentSound1.videoId, $("#pitch-slider1").slider("value"));
+            currentSound2 = new Sound(currentSound2.videoId, $("#pitch-slider2").slider("value"), $("#player2bpm"));
         }
 
         currentSound2.togglePlay($("#vertical-slider2").slider("value"));
-        togglePlayIcon(currentSound2, $("#play2"));
+        togglePlayIcon(currentSound2, $("#playButton2"));
     });
 
     $("#waveform1").on("click", function(event) {
@@ -203,7 +203,7 @@ $(function() {
 
         if ($(this).hasClass('on')) {
             $('#playlist').append(
-                $(this).clone().append($('<button>').attr('class', 'btn btn-sm btn-default assign1-button').append(
+                $(this).clone().append($('<button>').attr('class', 'btn btn-sm btn-default assign1-button').append( //TODO: attrを使わない
                         '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <strong>1</strong>')
                 ).append($('<button>').attr('class', 'btn btn-sm btn-default assign2-button').append(
                         '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <strong>2</strong>')

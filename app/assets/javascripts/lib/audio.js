@@ -12,7 +12,7 @@ var innerHeight;
 var innerBottom;
 
 $(function() {
-    canvasWidth = $("canvas")[0].width;
+    canvasWidth = $("canvas")[0].width; //TODO: document.querySelectorに書き換える
     canvasheight = $("canvas")[0].height;
 
     innerWidth = canvasWidth - paddingLeft - paddingRight;
@@ -206,18 +206,116 @@ function drawWaveform(canvas, data, sampleRate) {
 
 }
 
+//-----bpm detection-----//
+
+function getLowpassFilteredBuffer(buffer) {
+    return new Promise(function(resolve) {
+
+        var offlineContext = new (window.OfflineAudioContext
+            || window.webkitOfflineAudioContext)(1, buffer.length, buffer.sampleRate);
+
+        var source = offlineContext.createBufferSource();
+        source.buffer = buffer;
+
+        var filter = offlineContext.createBiquadFilter();
+        filter.type = "lowpass";
+
+        source.connect(filter);
+        filter.connect(offlineContext.destination);
+
+        source.start(0);
+
+        offlineContext.startRendering();
+
+        offlineContext.oncomplete = function(e) {
+            resolve(e.renderedBuffer);
+        };
+    });
+}
+
+function getPeaksAtThreshold(buffer, threshold) {
+    var peaksArray = [];
+    var length = buffer.length;
+    for(var i = 0; i < length;) {
+        if (buffer[i] > threshold) {
+            peaksArray.push(i);
+            // Skip forward ~ 1/4s to get past this peak.
+            i += 10000;
+        }
+        i++;
+    }
+
+    return peaksArray;
+}
+
+// Function used to return a histogram of peak intervals
+function countIntervalsBetweenNearbyPeaks(peaks) {
+    var intervalCounts = [];
+    peaks.forEach(function(peak, index) {
+        for(var i = 0; i < 10; i++) {
+            var interval = peaks[index + i] - peak;
+            var foundInterval = intervalCounts.some(function(intervalCount) {
+                if (intervalCount.interval === interval)
+                    return intervalCount.count++;
+            });
+            if (!foundInterval) {
+                intervalCounts.push({
+                    interval: interval,
+                    count: 1
+                });
+            }
+        }
+    });
+    return intervalCounts;
+}
+
+// Function used to return a histogram of tempo candidates.
+function groupNeighborsByTempo(intervalCounts) {
+    var tempoCounts = [];
+    intervalCounts.forEach(function(intervalCount, i) {
+        if (intervalCount.interval === 0) { return; }
+
+        // Convert an interval to tempo
+        var theoreticalTempo = 60 / (intervalCount.interval / 44100);
+
+        // Adjust the tempo to fit within the 90-180 BPM range
+        while (theoreticalTempo < 90) theoreticalTempo *= 2;
+        while (theoreticalTempo > 180) theoreticalTempo /= 2;
+
+        var foundTempo = tempoCounts.some(function(tempoCount) {
+            if (tempoCount.tempo === theoreticalTempo)
+                return tempoCount.count += intervalCount.count;
+        });
+        if (!foundTempo) {
+            tempoCounts.push({
+                tempo: theoreticalTempo,
+                count: intervalCount.count
+            });
+        }
+    });
+    tempoCounts.sort(function(a,b){ //countで降順ソート
+        if(a.count > b.count) return -1;
+        if(a.count < b.count) return 1;
+        return 0;
+    });
+
+    return Math.round(tempoCounts[0].tempo); //第一候補をreturn
+}
+
 /**
  * soundjsのaudioInstanceに各種プロパティとメソッドを追加した
  * オブジェクトを返すコンストラクタ
  * @returns {AbstractSoundInstance}
  * @constructor
  */
-function Sound(videoId, pitch) {
+function Sound(videoId, pitch, $bpmDiv) {
     var self = createjs.Sound.createInstance(videoId);
 
     //-----property-----//
     self.videoId = videoId;
-    self.pitch = pitch;
+    self.$bpmDiv = $bpmDiv; //bpmを書くdiv。苦肉の策。
+    self.bpm     = null;
+    self.pitch   = pitch;
 
     //-----method-----//
 
@@ -226,24 +324,24 @@ function Sound(videoId, pitch) {
         if (volume !== undefined) { self.volume = volume }
 
         //そのインスタンスでの初回の再生の場合、play()する
-        if (this.playState === null) {
-            this.play();
+        if (self.playState === null) {
+            self.play();
         } else {
-            this.paused = !this.paused;
+            self.paused = !self.paused;
         }
 
         //pauseする度にaudioBufferSourceNodeが作りなおされピッチが初期化されてしまうため、
         //再生するごとに毎回ピッチを設定する
-        if (this.isPlaying()) {
-            this.changePitch(this.pitch);
+        if (self.isPlaying()) {
+            self.changePitch(self.pitch);
         }
 
     };
 
     self.changePitch = function(pitch) {
-        this.pitch = pitch;
-        if (this.isPlaying()) {
-            this.sourceNode.playbackRate.value = pitch;
+        self.pitch = pitch;
+        if (self.isPlaying()) {
+            self.sourceNode.playbackRate.value = pitch;
         }
     };
 
@@ -252,20 +350,43 @@ function Sound(videoId, pitch) {
         if (x < 0 || innerWidth < x) { return; } // paddingの部分のクリックの場合、シークしない
 
         var normalizedX = x / canvasWidth; //正規化
-        var seekPoint = this.duration * normalizedX;
+        var seekPoint = self.duration * normalizedX;
 
-        this.position = seekPoint;
+        self.position = seekPoint;
 
         //シークする度にピッチが初期化されてしまうため、毎回ピッチを設定する
-        if (this.isPlaying()) {
-            this.changePitch(this.pitch);
+        if (self.isPlaying()) {
+            self.changePitch(self.pitch);
         }
 
         //TODO: 再生位置を示す赤線の移動
     };
 
+    //newすると同時にBPMを取得するため、即時関数になっています
+    //コールバック関数から値を返却する方法がわからなかったため、この仕様になりました
+    self.detectBpm = function() {
+        getLowpassFilteredBuffer(self._playbackResource)
+            .then(function(lowpassedAudio) {
+                var peaks = [],
+                initialThreshold = 0.9,
+                threshold = initialThreshold,
+                minThresold = 0.3,
+                minPeaks = 30;
+
+                //peakがminPeaks分取れるまで、Thresholdを落としていく
+                while (peaks.length < minPeaks && threshold >= minThresold) {
+                    peaks = getPeaksAtThreshold(lowpassedAudio.getChannelData(0), threshold);
+                    threshold -= 0.05;
+                }
+                var intervalCounts = countIntervalsBetweenNearbyPeaks(peaks);
+                self.bpm = groupNeighborsByTempo(intervalCounts);
+
+                $bpmDiv.html("bpm: " + self.bpm);
+            });
+    }();
+
     self.isPlaying = function() {
-        return this.playState === createjs.Sound.PLAY_SUCCEEDED && this.paused === false;
+        return self.playState === createjs.Sound.PLAY_SUCCEEDED && self.paused === false;
     };
 
     return self
