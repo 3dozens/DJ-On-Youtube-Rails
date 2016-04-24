@@ -169,7 +169,7 @@ $(function() {
             maxResults: 10
         };
 
-        $.get(url, options, function(rs){
+        $.get(url, options, function(rs){ //TODO: 関数に切り出す
             console.log(rs);
             $('#list').empty();
             for (var i = 0; i < rs.items.length; i++) {
@@ -202,7 +202,7 @@ $(function() {
         $(this).toggleClass('on');
 
         if ($(this).hasClass('on')) {
-            $('#playlist').append(
+            $('#playlist').append( //TODO: 関数に切り出す
                 $(this).clone().append($('<button>').attr('class', 'btn btn-sm btn-default assign1-button').append( //TODO: attrを使わない
                         '<span class="glyphicon glyphicon-plus" aria-hidden="true"></span> <strong>1</strong>')
                 ).append($('<button>').attr('class', 'btn btn-sm btn-default assign2-button').append(

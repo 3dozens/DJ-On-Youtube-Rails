@@ -40,7 +40,7 @@ function createContext() {
  * @param $dfd
  * @returns {*}
  */
-function loadSounds(videoIds, $dfd) {
+function loadSounds(videoIds, $dfd) { //TODO: Promiseに書き換える
     var baseURL = "http://192.168.33.10:3000/music-request?"; // ajaxリクエストのベースURL
 
     // ajaxリクエストのためのURLを組み立てる
