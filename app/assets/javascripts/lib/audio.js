@@ -313,9 +313,10 @@ function Sound(videoId, pitch, $bpmDiv) {
 
     //-----property-----//
     self.videoId = videoId;
-    self.$bpmDiv = $bpmDiv; //bpmを書くdiv。苦肉の策。
     self.bpm     = null;
     self.pitch   = pitch;
+
+    self._$bpmDiv = $bpmDiv; //bpmを書くdiv。苦肉の策。
 
     //-----method-----//
 
@@ -332,7 +333,7 @@ function Sound(videoId, pitch, $bpmDiv) {
 
         //pauseする度にaudioBufferSourceNodeが作りなおされピッチが初期化されてしまうため、
         //再生するごとに毎回ピッチを設定する
-        if (self.isPlaying()) {
+        if (self._isPlaying()) {
             self.changePitch(self.pitch);
         }
 
@@ -340,7 +341,7 @@ function Sound(videoId, pitch, $bpmDiv) {
 
     self.changePitch = function(pitch) {
         self.pitch = pitch;
-        if (self.isPlaying()) {
+        if (self._isPlaying()) {
             self.sourceNode.playbackRate.value = pitch;
         }
     };
@@ -355,7 +356,7 @@ function Sound(videoId, pitch, $bpmDiv) {
         self.position = seekPoint;
 
         //シークする度にピッチが初期化されてしまうため、毎回ピッチを設定する
-        if (self.isPlaying()) {
+        if (self._isPlaying()) {
             self.changePitch(self.pitch);
         }
 
@@ -364,7 +365,7 @@ function Sound(videoId, pitch, $bpmDiv) {
 
     //newすると同時にBPMを取得するため、即時関数になっています
     //コールバック関数から値を返却する方法がわからなかったため、この仕様になりました
-    self.detectBpm = function() {
+    self._detectBpm = function() {
         getLowpassFilteredBuffer(self._playbackResource)
             .then(function(lowpassedAudio) {
                 var peaks = [],
@@ -381,11 +382,11 @@ function Sound(videoId, pitch, $bpmDiv) {
                 var intervalCounts = countIntervalsBetweenNearbyPeaks(peaks);
                 self.bpm = groupNeighborsByTempo(intervalCounts);
 
-                $bpmDiv.html("bpm: " + self.bpm);
+                _$bpmDiv.html("bpm: " + self.bpm);
             });
     }();
 
-    self.isPlaying = function() {
+    self._isPlaying = function() {
         return self.playState === createjs.Sound.PLAY_SUCCEEDED && self.paused === false;
     };
 
