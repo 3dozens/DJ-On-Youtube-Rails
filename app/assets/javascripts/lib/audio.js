@@ -11,27 +11,80 @@ var innerWidth;
 var innerHeight;
 var innerBottom;
 
+var ch1bass;
+var ch1mid;
+var ch1treble;
+
+var ch2bass;
+var ch2mid;
+var ch2treble;
+
+var ch1EQ;
+var ch2EQ;
+
 $(function() {
+    setupCanvasAreaVariable();
+
+    createjs.Sound.registerPlugins([createjs.WebAudioPlugin]);
+    setupCh1EQ();
+    setupCh2EQ();
+});
+
+function setupCanvasAreaVariable() {
     canvasWidth = $("canvas")[0].width; //TODO: document.querySelectorに書き換える
     canvasheight = $("canvas")[0].height;
 
     innerWidth = canvasWidth - paddingLeft - paddingRight;
     innerHeight = canvasheight - paddingTop - paddingBottom;
     innerBottom = canvasheight - paddingBottom;
-});
+}
 
-/**
- * Web Audio APIが使えるか確認しつつ、contextをつくる
- * @returns AudioContext
- */
-function createContext() {
-    try {
-        var SupportedAudioContext = window.AudioContext || window.webkitAudioContext;
-    } catch (e) {
-        throw new Error('Web Audio API is not supported.');
-    }
+function setupCh1EQ() {
+    var context = createjs.WebAudioPlugin.context;
 
-    return new SupportedAudioContext();
+    ch1bass   = context.createBiquadFilter();
+    ch1mid    = context.createBiquadFilter();
+    ch1treble = context.createBiquadFilter();
+
+    ch1bass.type   = 'lowshelf';
+    ch1mid.type    = 'peaking';
+    ch1treble.type = 'highshelf';
+
+    ch1bass.frequency.value   =  500;  //  500 Hz
+    ch1mid.frequency.value    = 1000;  // 1000 Hz
+    ch1treble.frequency.value = 2000;  // 2000 Hz
+
+    ch1mid.Q.value = Math.SQRT1_2; // イコライザーのクオリティーファクタは 1 / √ 2 に設定するのが通例らしい
+
+    ch1bass.connect(ch1mid);
+    ch1mid.connect(ch1treble);
+    ch1treble.connect(createjs.Sound.activePlugin.gainNode); //context.destinationとどちらにつなぐ？
+
+    ch1EQ = ch1bass; //bassに音源をつなぎ、そこからmid, trebleと繋げるので、bassを仮想的なEQノードとする
+}
+
+function setupCh2EQ() {
+    var context = createjs.WebAudioPlugin.context;
+
+    ch2bass   = context.createBiquadFilter();
+    ch2mid    = context.createBiquadFilter();
+    ch2treble = context.createBiquadFilter();
+
+    ch2bass.type   = 'lowshelf';
+    ch2mid.type    = 'peaking';
+    ch2treble.type = 'highshelf';
+
+    ch2bass.frequency.value   =  500;  //  500 Hz
+    ch2mid.frequency.value    = 1000;  // 1000 Hz
+    ch2treble.frequency.value = 2000;  // 2000 Hz
+
+    ch2mid.Q.value = Math.SQRT1_2; // イコライザーのクオリティーファクタは 1 / √ 2 に設定するのが通例らしい
+
+    ch2bass.connect(ch2mid);
+    ch2mid.connect(ch2treble);
+    ch2treble.connect(createjs.Sound.activePlugin.gainNode); //context.destinationとどちらにつなぐ？
+
+    ch2EQ = ch2bass; //bassに音源をつなぎ、そこからmid, trebleと繋げるので、bassを仮想的なEQノードとする
 }
 
 /**
@@ -41,10 +94,8 @@ function createContext() {
  * @returns {*}
  */
 function loadSounds(videoIds, $dfd) { //TODO: Promiseに書き換える
-    var baseURL = "http://192.168.33.10:3000/music-request?"; // ajaxリクエストのベースURL
-
     // ajaxリクエストのためのURLを組み立てる
-    var requestURL = baseURL;
+    var requestURL = "http://192.168.33.10:3000/music-request?";
     $.each(videoIds, function(i, id) {
         requestURL += "video_ids[]=" + id;
         if (id !== $(videoIds).last()[0]) requestURL += "&"; // 最後のパラメータじゃなかったら&を追記
@@ -302,19 +353,32 @@ function groupNeighborsByTempo(intervalCounts) {
     return Math.round(tempoCounts[0].tempo); //第一候補をreturn
 }
 
+function setEQGain(bass, mid, treble, channel) {
+    if (channel === 1) {
+        ch1bass.gain.value = bass;
+        ch1mid.gain.value = mid;
+        ch1treble.gain.value = treble;
+    } else if (channel === 2) {
+        ch2bass.gain.value = bass;
+        ch2mid.gain.value = mid;
+        ch2treble.gain.value = treble;
+    }
+}
+
 /**
  * soundjsのaudioInstanceに各種プロパティとメソッドを追加した
  * オブジェクトを返すコンストラクタ
  * @returns {AbstractSoundInstance}
  * @constructor
  */
-function Sound(videoId, pitch, $bpmDiv) {
+function Sound(videoId, pitch, channel, $bpmDiv) {
     var self = createjs.Sound.createInstance(videoId);
 
     //-----property-----//
-    self.videoId = videoId;
-    self.bpm     = null;
-    self.pitch   = pitch;
+    self.videoId  = videoId;
+    self.bpm      = null;
+    self.pitch    = pitch;
+    self.channel  = channel;
 
     self._$bpmDiv = $bpmDiv; //bpmを書くdiv。苦肉の策。
 
@@ -331,19 +395,10 @@ function Sound(videoId, pitch, $bpmDiv) {
             self.paused = !self.paused;
         }
 
-        //pauseする度にaudioBufferSourceNodeが作りなおされピッチが初期化されてしまうため、
-        //再生するごとに毎回ピッチを設定する
-        if (self._isPlaying()) {
-            self.changePitch(self.pitch);
-        }
+        //pauseする度にaudioBufferSourceNodeが作りなおされてしまうため、
+        //再生するごとに再設定する
+        self._resetPlayState();
 
-    };
-
-    self.changePitch = function(pitch) {
-        self.pitch = pitch;
-        if (self._isPlaying()) {
-            self.sourceNode.playbackRate.value = pitch;
-        }
     };
 
     self.seekSound = function(x) {
@@ -355,17 +410,52 @@ function Sound(videoId, pitch, $bpmDiv) {
 
         self.position = seekPoint;
 
-        //シークする度にピッチが初期化されてしまうため、毎回ピッチを設定する
-        if (self._isPlaying()) {
-            self.changePitch(self.pitch);
-        }
+        //シークする度に初期化されてしまうため、再設定する
+        self._resetPlayState();
 
         //TODO: 再生位置を示す赤線の移動
     };
 
-    //newすると同時にBPMを取得するため、即時関数になっています
-    //コールバック関数から値を返却する方法がわからなかったため、この仕様になりました
-    self._detectBpm = function() {
+    self.changePitch = function(pitch) {
+        self.pitch = pitch;
+        if (self._isPlaying()) {
+            self.sourceNode.playbackRate.value = pitch;
+        }
+    };
+
+    //EQに接続しなおしたところsoundjsの音量設定が機能しなくなったため
+    //直接AudioBufferSourceNodeに音量を設定します
+    self.changeVolume = function(volume) {
+        self.volume = volume;
+        if (self._isPlaying()) {
+            self.sourceNode.gain.value = volume;
+        }
+    };
+
+    //音量、ピッチ、EQを再設定します
+    self._resetPlayState = function() {
+        if (self._isPlaying()) {
+            self.setVolume(self.volume);
+            self.changePitch(self.pitch);
+            self._connectToEQ();
+        }
+    };
+
+    self._connectToEQ = function() {
+        self.sourceNode.disconnect(); //sourceNodeはプレイ中にしか存在しない
+
+        if (channel === 1) {
+            self.sourceNode.connect(ch1EQ);
+        } else if (channel === 2) {
+            self.sourceNode.connect(ch2EQ);
+        }
+    };
+
+    self._isPlaying = function() {
+        return self.playState === createjs.Sound.PLAY_SUCCEEDED && self.paused === false;
+    };
+
+    self._detectBpm = function() { //返り値の代入になっている？
         getLowpassFilteredBuffer(self._playbackResource)
             .then(function(lowpassedAudio) {
                 var peaks = [],
@@ -382,13 +472,9 @@ function Sound(videoId, pitch, $bpmDiv) {
                 var intervalCounts = countIntervalsBetweenNearbyPeaks(peaks);
                 self.bpm = groupNeighborsByTempo(intervalCounts);
 
-                _$bpmDiv.html("bpm: " + self.bpm);
+                self._$bpmDiv.html("bpm: " + self.bpm);
             });
     }();
-
-    self._isPlaying = function() {
-        return self.playState === createjs.Sound.PLAY_SUCCEEDED && self.paused === false;
-    };
 
     return self
 }

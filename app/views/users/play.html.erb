@@ -4,33 +4,37 @@
   <div class="row">
     <div class="col-md-6" id="turntable1">
       <h2>Turntable 1</h2>
-      <div class="title" id="title1"></div>
-      <div id="player1">
+      <div class="player" id="player1">
         <canvas id="waveform1" height="120" width="520"></canvas><br>
-        <button class="btn btn-default" id="playButton1" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
-        <div id="player1bpm"></div>
       </div>
+      <div class="title" id="title1"></div>
+      <div id="player1bpm"></div>
+      <button class="btn btn-default playButton" id="playButton1" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
     </div>
 
     <div class="col-md-6" id="turntable2">
       <h2>Turntable 2</h2>
-      <div class="title" id="title2"></div>
       <div id="player2">
         <canvas id="waveform2" height="120" width="520"></canvas><br>
-        <button class="btn btn-default" id="playButton2" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
-        <div id="player2bpm"></div>
       </div>
+      <div class="title" id="title2"></div>
+      <div id="player2bpm"></div>
+      <button class="btn btn-default playButton" id="playButton2" type="button"><span class="glyphicon glyphicon-play" aria-hidden="true"></span></button>
     </div>
   </div>
 </div>
 <span class="glyphicon glyphicon-volume-up" aria-hidden="true"></span>
-<div class="row">
-  <div class="col-md-offset-3 col-md-1"><p class="pitch-slider" id="pitch-slider1"></p></div>
-  <div class="col-md-1"><p class="vertical-slider" id="vertical-slider1"></p></div>
-  <div class="col-md-offset-2 col-md-1"><p class="vertical-slider" id="vertical-slider2"></p></div>
-  <div class="col-md-1"><p class="pitch-slider" id="pitch-slider2"></p></div>
+<div id="sliders-container">
+  <div class="row" id="vertical-sliders-container">
+    <div class="col-md-offset-2 col-md-1"><p class="eq-slider eq-treble" id="eq-treble1"></p><p class="eq-slider eq-mid" id="eq-mid1"></p><p class="eq-slider eq-bass" id="eq-bass1"></p></div>
+    <div class="col-md-1"><p class="pitch-slider" id="pitch-slider1"></p></div>
+    <div class="col-md-1"><p class="vertical-slider" id="vertical-slider1"></p></div>
+    <div class="col-md-offset-2 col-md-1"><p class="vertical-slider" id="vertical-slider2"></p></div>
+    <div class="col-md-1"><p class="pitch-slider" id="pitch-slider2"></p></div>
+    <div class="col-md-offset-1 col-md-1"><p class="eq-slider eq-treble" id="eq-treble2"></p><p class="eq-slider eq-mid" id="eq-mid2"><p class="eq-slider eq-bass" id="eq-bass2"></p></div>
+  </div>
+  <div id="holizontal-slider"></div>
 </div>
-<div id="holizontal-slider"></div>
 <hr>
 <form class="form-inline" id="search" onsubmit="return false;">
   <div class="form-group">

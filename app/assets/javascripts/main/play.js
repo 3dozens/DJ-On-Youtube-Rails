@@ -4,48 +4,44 @@ $(function() {
 
     $('#q').focus();
 
-    //左縦フェーダー
-    $( "#vertical-slider1" ).slider({
+    //縦フェーダー共通オプション
+    var verticalSliderOption = {
         orientation: "vertical",
         range: "min",
         min: 0,
         max: 1,
         step: 0.01,
-        value: 0.6, //音量の初期値
-        slide: function( event, ui ) {
-            var newVolume = ui.value;
-            var holizontalValue = $('#holizontal-slider').slider("value");
+        value: 0.6 //音量の初期値
+    };
 
-            //横フェーダーが真ん中より右側だったら音量を減らす
-            if (holizontalValue > 1) {
-                newVolume = newVolume * (2 - holizontalValue);
-            }
-            currentSound1.volume = newVolume;
+    //左縦フェーダー固有オプション
+    var verticalSlider1Opt = $.extend(true, {}, verticalSliderOption);
+    verticalSlider1Opt.slide = function( event, ui ) {
+        var newVolume = ui.value;
+        var holizontalValue = $('#holizontal-slider').slider("value");
+
+        //横フェーダーが真ん中より右側だったら音量を減らす
+        if (holizontalValue > 1) {
+            newVolume = newVolume * (2 - holizontalValue);
         }
-    });
+        currentSound1.changeVolume(newVolume);
+    };
 
-    //右縦フェーダー
-    $( "#vertical-slider2" ).slider({
-        orientation: "vertical",
-        range: "min",
-        min: 0,
-        max: 1,
-        step: 0.01,
-        value: 0.6, //音量の初期値
-        slide: function( event, ui ) {
-            var newVolume = ui.value;
-            var holizontalValue = $('#holizontal-slider').slider("value");
+    //右縦フェーダー固有オプション
+    var verticalSlider2Opt = $.extend(true, {}, verticalSliderOption);
+    verticalSlider2Opt.slide = function( event, ui ) {
+        var newVolume = ui.value;
+        var holizontalValue = $('#holizontal-slider').slider("value");
 
-            //横フェーダーが真ん中より左側だったら音量を減らす
-            if (holizontalValue < 1) {
-                newVolume = newVolume * holizontalValue;
-            }
-            currentSound2.volume = newVolume;
+        //横フェーダーが真ん中より左側だったら音量を減らす
+        if (holizontalValue < 1) {
+            newVolume = newVolume * holizontalValue;
         }
-    });
+        currentSound2.changeVolume(newVolume);
+    };
 
-    //横フェーダー
-    $( "#holizontal-slider" ).slider({
+    //横フェーダーオプション
+    var holizontalSliderOption = {
         min: 0,
         max: 2,
         value: 1, //横フェーダーの初期値は真ん中
@@ -57,40 +53,75 @@ $(function() {
 
             if (ui.value > 1) { //フェーダーが右側にある場合、左側の音量を下げる
                 newVolume = player1Volume * (2 - ui.value);
-                currentSound1.volume = newVolume;
+                currentSound1.changeVolume(newVolume);
             } else { //フェーダーが左側にある場合、右側の音量を下げる
                 newVolume = player2Volume * ui.value;
-                currentSound2.volume = newVolume;
+                currentSound2.changeVolume(newVolume);
             }
         }
-    });
+    };
 
-    //左ピッチスライダー
-    $( "#pitch-slider1" ).slider({
+    //ピッチスライダー共通オプション
+    var pitchSliderOption = {
         orientation: "vertical",
         range: "min",
-        min: 0,
-        max: 2,
+        min: 0.4,
+        max: 1.6,
         step: 0.01,
-        value: 1.0, //ピッチの初期値
-        slide: function( event, ui ) {
-            currentSound1.changePitch(ui.value);
-        }
-    });
+        value: 1.0 //ピッチの初期値
+    };
 
-    //右ピッチスライダー
-    $( "#pitch-slider2" ).slider({
+    //左ピッチスライダー固有オプション
+    var pitchSlider1Opt = $.extend(true, {}, pitchSliderOption);
+    pitchSlider1Opt.slide = function( event, ui ) {
+        currentSound1.changePitch(ui.value);
+    };
+    
+    //右ピッチスライダー固有オプション
+    var pitchSlider2Opt = $.extend(true, {}, pitchSliderOption);
+    pitchSlider2Opt.slide = function( event, ui ) {
+        currentSound2.changePitch(ui.value);
+    };
+    
+    //イコライザー共通オプション
+    var EQOption = {
         orientation: "vertical",
-        range: "min",
-        min: 0,
-        max: 2,
-        step: 0.01,
-        value: 1.0, //音量の初期値
-        slide: function( event, ui ) {
-            currentSound2.changePitch(ui.value);
+        min: -40,
+        max: 40,
+        value: 0,
+        slide: function() {
+            setEQGain($("#eq-bass1").slider("value"), $("#eq-mid1").slider("value"), $("#eq-treble1").slider("value"), 1);
         }
-    });
+    };
 
+    //左イコライザー固有オプション
+    var EQ1Opt = $.extend(true, {}, EQOption);
+    EQ1Opt.slide = function() {
+        setEQGain($("#eq-bass1").slider("value"), $("#eq-mid1").slider("value"), $("#eq-treble1").slider("value"), 1);
+    };
+    
+    //右イコライザー固有オプション
+    var EQ2Opt = $.extend(true, {}, EQOption);
+    EQ2Opt.slide = function() {
+        setEQGain($("#eq-bass2").slider("value"), $("#eq-mid2").slider("value"), $("#eq-treble2").slider("value"), 2);
+    };
+    
+    $("#vertical-slider1").slider(verticalSlider1Opt);
+    $("#vertical-slider2").slider(verticalSlider2Opt);
+    
+    $("#holizontal-slider").slider(holizontalSliderOption);
+    
+    $("#pitch-slider1").slider(pitchSlider1Opt);
+    $("#pitch-slider2").slider(pitchSlider2Opt);
+    
+    $("#eq-bass1").slider(EQ1Opt);
+    $("#eq-mid1").slider(EQ1Opt);
+    $("#eq-treble1").slider(EQ1Opt);
+
+    $("#eq-bass2").slider(EQ2Opt);
+    $("#eq-mid2").slider(EQ2Opt);
+    $("#eq-treble2").slider(EQ2Opt);
+    
     $('#search').submit(curlYoutubeThumbnail);
 
     $(document).on('click', '#list .movie', cloneThumbnailToPlaylist);
@@ -104,7 +135,7 @@ $(function() {
         var videoId = $(movie).data('video-id');
 
         loadSounds([videoId], $dfd).then(function() {
-            currentSound1 = new Sound(videoId, $("#pitch-slider1").slider("value"), $("#player1bpm"));
+            currentSound1 = new Sound(videoId, $("#pitch-slider1").slider("value"), 1, $("#player1bpm"));
             $("#title1").html(videoName);
             drawWaveformToCanvas(currentSound1, $("#waveform1")[0]);
         });
@@ -117,7 +148,7 @@ $(function() {
         var videoId = $(movie).data('video-id');
 
         loadSounds([videoId], $dfd).then(function() {
-            currentSound2 = new Sound(videoId, $("#pitch-slider2").slider("value"), $("#player2bpm"));
+            currentSound2 = new Sound(videoId, $("#pitch-slider2").slider("value"), 2, $("#player2bpm"));
             $("#title2").html(videoName);
             drawWaveformToCanvas(currentSound2, $("#waveform2")[0]);
         });

@@ -12,6 +12,10 @@ div.turntables-container {
     height: 500px;
 }
 
+.title {
+    height: 1em;
+}
+
 #playButton1 {
     text-align: left;
 }
@@ -74,11 +78,6 @@ li.movie.on {
 
 li.movie.playing {
     background-color: deeppink;
-}
-
-p.title {
-    height: 40px;
-    margin: 0;
 }
 
 .assign1-button {
