@@ -1,7 +1,23 @@
-== README
+== DJ on Youtube
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+DJ on Youtube is web application allows you to DJing music uploaded to Youtube.
+
+=== main features
+
+* DJing with 2decks
+
+* Effectors
+
+* EQ
+
+* Display waveform
+
+* BPM detection
+
+...and more
+
+
+
 
 Things you may want to cover:
 
